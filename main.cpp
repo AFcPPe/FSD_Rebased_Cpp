@@ -1,0 +1,56 @@
+#include <QCoreApplication>
+#include <QDebug>
+#include "Global.h"
+#include "Server.h"
+
+void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    static QMutex mutex;
+    mutex.lock();
+    QString text;
+    switch(type)
+    {
+        case QtDebugMsg:
+            text = QString("DEBUG");
+            break;
+        case QtWarningMsg:
+            text = QString("WARNING");
+            break;
+        case QtCriticalMsg:
+            text = QString("CRITICAL");
+            break;
+        case QtFatalMsg:
+            text = QString("FATAL");
+            break;
+        case QtInfoMsg:
+            text = QString("INFO");
+    }
+//    QString context_info = QString("File:(%1) Line:(%2)").arg(QString(context.file)).arg(context.line);
+    QString current_date_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    QString current_date = QString("%1").arg(current_date_time);
+    QString message = QString("[%2] [%1]: %3").arg(text,current_date,msg);
+    QFile file("log.txt");
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream text_stream(&file);
+    text_stream << message << "\r\n";
+    qDebug()<<message.toStdString().c_str();
+    file.flush();
+    file.close();
+    mutex.unlock();
+}
+
+int main(int argc, char *argv[]) {
+    QCoreApplication a(argc, argv);
+    //注册日志系统
+    qInstallMessageHandler(log);
+    qInfo()<<"SKYline FSD Starting";
+    qInfo()<<"Loading Settings";
+    //创建全局对象
+    Global::g_global_struct = new Global();
+    //读取设置
+    Global::get().s.load();
+    qInfo()<<"Settings have been loaded";
+    //创建服务器
+    Global::get().server = new Server();
+    return QCoreApplication::exec();
+}
