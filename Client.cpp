@@ -99,6 +99,17 @@ void Client::processData(QString data) {
 }
 
 void Client::onAddATCReceived(PDUAddATC pdu) {
-    qDebug()<<pdu.toTokens();
-
+    UserInfo info = Global::get().mysql->getUserInfo(pdu.CID);
+    if(info.cid==""){
+        qDebug()<<"User not in database";
+        //TODO: 不存在用户的处理
+        return;
+    }
+    if(info.encryptedPassword != pdu.Password){
+        qDebug()<<"Incorrect Password";
+        //TODO: 密码错误的处理
+        return;
+    }
+    qDebug()<<"Correct";
+    //TODO: 密码正确的处理
 }

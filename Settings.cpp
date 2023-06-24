@@ -16,7 +16,6 @@ void Settings::load() {
         file.close();
     }
     QJsonDocument jsonDocu = QJsonDocument::fromJson(jsonData);
-
     if(jsonDocu.isObject()){
         QJsonObject obj_root = jsonDocu.object();
         //读取motd
@@ -26,6 +25,15 @@ void Settings::load() {
         }
         //读取服务器端口
         this->usServerPort =  obj_root.value("server port").toInteger();
+        //读取数据库信息
+        auto obj_mysql = obj_root.value("mysql").toObject();
+        this->mysqlSettings.address = obj_mysql.value("address").toString();
+        this->mysqlSettings.port = obj_mysql.value("port").toInt();
+        this->mysqlSettings.db_user = obj_mysql.value("db_user").toString();
+        this->mysqlSettings.db_data = obj_mysql.value("db_data").toString();
+        this->mysqlSettings.table_user = obj_mysql.value("table_user").toString();
+        this->mysqlSettings.account = obj_mysql.value("account").toString();
+        this->mysqlSettings.password = obj_mysql.value("password").toString();
     }
 
 }

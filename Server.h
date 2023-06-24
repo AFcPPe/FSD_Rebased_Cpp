@@ -14,7 +14,8 @@ class Server :public QObject{
 public:
     Server();
     QTcpServer *m_server;
-    QList<Client*> clientPool;
+    QList<Client*> qlClientPool;
+
 private slots:
     void onNewConnection();
 };

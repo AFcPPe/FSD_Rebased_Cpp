@@ -10,10 +10,21 @@
 #include <QList>
 #include <QDebug>
 
+struct MysqlSettings{
+    QString address;
+    int port;
+    QString account;
+    QString password;
+    QString db_user;
+    QString table_user;
+    QString db_data;
+};
+
 class Settings {
 public:
     QList<QString> qlsMotd;
     unsigned short usServerPort = 6809;
+    MysqlSettings mysqlSettings;
     void load();
     Settings();
 };

@@ -11,6 +11,7 @@ set(CMAKE_PREFIX_PATH "D:/Qt/6.5.1/mingw_64/lib/cmake")
 find_package(Qt6 COMPONENTS
         Core
         Network
+        Sql
         REQUIRED)
 
 add_executable(FSD_Rebased
@@ -28,7 +29,7 @@ add_executable(FSD_Rebased
         pdu/serializer.h
         pdu/serializer.cpp
         pdu/client_properties.h
-        pdu/enums.h
+        enums.h
         pdu/pdu/pdu_add_atc.cpp
         pdu/pdu/pdu_add_atc.h
         pdu/pdu/pdu_base.cpp
@@ -67,10 +68,13 @@ add_executable(FSD_Rebased
         pdu/pdu/pdu_protocol_error.h
         pdu/pdu/pdu_send_fast.cpp
         pdu/pdu/pdu_send_fast.h
+        pdu/pdu/pdu_text_message.cpp
+        pdu/pdu/pdu_text_message.h
         )
 target_link_libraries(FSD_Rebased
         Qt::Core
         Qt::Network
+        Qt::Sql
         )
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -94,10 +98,15 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
                 "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll"
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
     endif ()
-    foreach (QT_LIB Core Network)
+    foreach (QT_LIB Core Network Sql)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/bin/Qt6${QT_LIB}${DEBUG_SUFFIX}.dll"
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
     endforeach (QT_LIB)
 endif ()
+
+install(TARGETS FSD_Rebased
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )

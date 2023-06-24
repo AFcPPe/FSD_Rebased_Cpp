@@ -21,7 +21,7 @@
 
 #include <QtGlobal>
 #include <QString>
-#include "enums.h"
+#include "../enums.h"
 
 template<typename T>
 inline QString toQString(const T& value);

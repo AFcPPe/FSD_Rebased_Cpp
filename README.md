@@ -8,4 +8,6 @@ Not yet any.
 - Read accounts from MYSQL.
 - Data output via redis.
 - Online metar acquire.
+- Redis server data output.
+- Server packet record via file or mysql.
 - And more.

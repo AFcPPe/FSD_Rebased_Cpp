@@ -31,6 +31,8 @@
 #include "pdu/pdu/pdu_metar_response.h"
 #include "pdu/pdu/pdu_metar_request.h"
 #include "pdu/pdu/pdu_send_fast.h"
+#include "Global.h"
+#include "Mysql.h"
 
 enum ClientStatus{
     Connected,
@@ -51,7 +53,7 @@ public:
     ClientStatus clientStatus;
     ClientType clientType;
     QTcpSocket *socket;
-    bool isAlive;
+    bool bIsAlive;
     QString m_partialPacket;
 signals:
     void RaisePilotPositionReceived(PDUPilotPosition pdu);

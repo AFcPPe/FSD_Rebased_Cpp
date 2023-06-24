@@ -11,6 +11,7 @@
 #include "Settings.h"
 
 class Server;
+class Mysql;
 
 class Global{
 public:
@@ -18,6 +19,7 @@ public:
     static Global &get();
     Settings s;
     Server *server;
+    Mysql *mysql;
 };
 
 

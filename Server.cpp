@@ -16,7 +16,7 @@ Server::Server() {
 void Server::onNewConnection() {
     if(m_server->hasPendingConnections()){
         QTcpSocket* socket =  m_server->nextPendingConnection();
-        clientPool.append(new Client(socket));
+        qlClientPool.append(new Client(socket));
         qInfo()<<QString("New connection from %1 established").arg(socket->peerAddress().toString()).toStdString().c_str();
     }
 }

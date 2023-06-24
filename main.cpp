@@ -2,6 +2,8 @@
 #include <QDebug>
 #include "Global.h"
 #include "Server.h"
+#include "Mysql.h"
+
 
 void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -11,8 +13,13 @@ void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
     switch(type)
     {
         case QtDebugMsg:
+#ifndef NDEBUG
             text = QString("DEBUG");
             break;
+#else
+            return;
+#endif
+
         case QtWarningMsg:
             text = QString("WARNING");
             break;
@@ -50,7 +57,11 @@ int main(int argc, char *argv[]) {
     //读取设置
     Global::get().s.load();
     qInfo()<<"Settings have been loaded";
+    //连接Mysql服务器
+    qInfo()<<"Connecting to Mysql Server";
+    Global::get().mysql = new Mysql();
     //创建服务器
     Global::get().server = new Server();
+
     return QCoreApplication::exec();
 }
