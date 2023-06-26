@@ -33,6 +33,7 @@
 #include "pdu/pdu/pdu_send_fast.h"
 #include "Global.h"
 #include "Mysql.h"
+#include <QtConcurrent/QtConcurrent>
 
 enum ClientStatus{
     Connected,
@@ -100,6 +101,7 @@ private:
 private slots:
     void onIncomingData();
     void onAddATCReceived(PDUAddATC pdu);
+    void onAddPilotReceived(PDUAddPilot pdu);
 
 
 

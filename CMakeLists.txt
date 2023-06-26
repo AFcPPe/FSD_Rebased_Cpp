@@ -12,6 +12,7 @@ find_package(Qt6 COMPONENTS
         Core
         Network
         Sql
+        Concurrent
         REQUIRED)
 
 add_executable(FSD_Rebased
@@ -75,6 +76,7 @@ target_link_libraries(FSD_Rebased
         Qt::Core
         Qt::Network
         Qt::Sql
+        Qt::Concurrent
         )
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -98,7 +100,7 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
                 "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll"
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
     endif ()
-    foreach (QT_LIB Core Network Sql)
+    foreach (QT_LIB Core Network Sql Concurrent)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/bin/Qt6${QT_LIB}${DEBUG_SUFFIX}.dll"
