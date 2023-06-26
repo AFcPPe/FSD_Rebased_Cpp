@@ -56,6 +56,7 @@ public:
     bool bIsAlive;
     QString m_partialPacket;
 signals:
+    //PDU Event
     void RaisePilotPositionReceived(PDUPilotPosition pdu);
     void RaiseFastPilotPositionReceived(PDUFastPilotPosition pdu);
     void RaiseATCPositionReceived(PDUATCPosition pdu);
@@ -77,12 +78,14 @@ signals:
     void RaiseKillRequestReceived(PDUKillRequest pdu);
     void RaiseProtocolErrorReceived(PDUProtocolError pdu);
     void RaiseSendFastReceived(PDUSendFast pdu);
+    //OuterEvent
+    void RaiseClientPendingKick(Client* client);
 private:
     void processData(QString data);
+    void showError(PDUProtocolError pdu);
 private slots:
     void onIncomingData();
-
-void onAddATCReceived(PDUAddATC pdu);
+    void onAddATCReceived(PDUAddATC pdu);
 
 
 

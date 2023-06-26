@@ -13,6 +13,7 @@ Client::Client(QTcpSocket *s) {
 }
 
 void Client::onIncomingData() {
+    bIsAlive = true;
     QString data = this->socket->readAll();
     processData(data);
 }
@@ -100,16 +101,31 @@ void Client::processData(QString data) {
 
 void Client::onAddATCReceived(PDUAddATC pdu) {
     UserInfo info = Global::get().mysql->getUserInfo(pdu.CID);
-    if(info.cid==""){
-        qDebug()<<"User not in database";
-        //TODO: 不存在用户的处理
+    if(info.cid!=pdu.CID){
+        qInfo()<<qPrintable(QString("User login failed. User %1 not in database. IP: %2").arg(pdu.CID,this->socket->peerAddress().toString()));
+        showError(PDUProtocolError("server", pdu.From, NetworkError::CallsignInvalid, pdu.CID, "Invalid CID/password", true));
         return;
     }
     if(info.encryptedPassword != pdu.Password){
-        qDebug()<<"Incorrect Password";
-        //TODO: 密码错误的处理
+        qInfo()<<qPrintable(QString("User login failed. Password mismatch. IP: %1").arg(this->socket->peerAddress().toString()));
+        showError(PDUProtocolError("server", pdu.From, NetworkError::CallsignInvalid, pdu.CID, "Invalid CID/password", true));
+        return;
+    }
+    if(info.rating < pdu.Rating){
+        qInfo()<<qPrintable(QString("User login failed. Requested level to high. IP: %1").arg(this->socket->peerAddress().toString()));
+        showError(PDUProtocolError("server", pdu.From, NetworkError::InvalidPositionForRating, pdu.CID, "Requested level to high.", true));
         return;
     }
     qDebug()<<"Correct";
+    this->clientStatus = Logon;
     //TODO: 密码正确的处理
+}
+
+void Client::showError(PDUProtocolError pdu) {
+    this->socket->write(Serialize(pdu).toLocal8Bit());
+    if(pdu.Fatal){
+        this->bIsAlive = false;
+        this->clientStatus = PendingKick;
+        RaiseClientPendingKick(this);
+    }
 }

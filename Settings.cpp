@@ -34,6 +34,8 @@ void Settings::load() {
         this->mysqlSettings.table_user = obj_mysql.value("table_user").toString();
         this->mysqlSettings.account = obj_mysql.value("account").toString();
         this->mysqlSettings.password = obj_mysql.value("password").toString();
+        //读取服务器相关设置
+        this->status_check_time = obj_root.value("status_check_time").toInt();
     }
 
 }

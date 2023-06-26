@@ -15,9 +15,12 @@ public:
     Server();
     QTcpServer *m_server;
     QList<Client*> qlClientPool;
+    QTimer qtStatus;
 
 private slots:
     void onNewConnection();
+    void onUserPendingKick(Client *client);
+    void onCheckStatus();
 };
 
 

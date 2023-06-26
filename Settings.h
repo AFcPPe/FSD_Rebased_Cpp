@@ -24,6 +24,7 @@ class Settings {
 public:
     QList<QString> qlsMotd;
     unsigned short usServerPort = 6809;
+    int status_check_time = 15;
     MysqlSettings mysqlSettings;
     void load();
     Settings();
