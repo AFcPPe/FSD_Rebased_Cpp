@@ -38,6 +38,18 @@ void Server::onUserPendingKick(Client* client) {
         qInfo()<<qPrintable(QString("Connection is destroyed by the server. IP: %1").arg(qlClientPool.value(index)->socket->peerAddress().toString()));
         qlClientPool.value(index)->socket->deleteLater();
         qlClientPool.removeAt(index);
+        if(client->clientStatus!=Connected){
+            qDebug()<<"Send";
+            if(client->clientType==Pilot){
+                qDebug()<<"SentDP";
+                onForwardInfoRequest(client,"@", Serialize(PDUDeletePilot(client->callsign,client->cid)));
+            } else
+            if(client->clientType==ATC){
+                qDebug()<<"SentDA";
+                onForwardInfoRequest(client,"@", Serialize(PDUDeleteATC(client->callsign,client->cid)));
+            }
+        }
+
         delete client;
     }
 }
