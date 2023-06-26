@@ -94,14 +94,18 @@ signals:
     void RaiseSendFastReceived(PDUSendFast pdu);
     //OuterEvent
     void RaiseClientPendingKick(Client* client);
+    void RaiseErrorToSend(PDUProtocolError pdu);
+    void RaiseMotdToRead();
 private:
     void processData(QString data);
-    void showError(PDUProtocolError pdu);
-    void readMotd() const;
-private slots:
-    void onIncomingData();
+
     void onAddATCReceived(PDUAddATC pdu);
     void onAddPilotReceived(PDUAddPilot pdu);
+private slots:
+    void onIncomingData();
+    void showError(PDUProtocolError pdu);
+    void readMotd();
+
 
 
 
