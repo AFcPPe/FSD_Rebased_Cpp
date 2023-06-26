@@ -19,7 +19,7 @@ void Settings::load() {
     if(jsonDocu.isObject()){
         QJsonObject obj_root = jsonDocu.object();
         //读取motd
-        auto motdArray =  obj_root.value("qlsMotd").toArray();
+        auto motdArray =  obj_root.value("motd").toArray();
         for(auto motd : motdArray){
             this->qlsMotd.push_back(motd.toString());
         }

@@ -46,6 +46,11 @@ enum ClientType{
     ATC
 };
 
+struct ClientLocation{
+    double lat;
+    double lon;
+};
+
 class Client: public QObject{
 Q_OBJECT
 public:
@@ -55,6 +60,14 @@ public:
     QTcpSocket *socket;
     bool bIsAlive;
     QString m_partialPacket;
+    //ATC和Pilot的共有属性
+    QString callsign;
+    QString realName;
+    QString cid;
+    NetworkRating rating;
+    ClientLocation location;
+    int visualRange;
+
 signals:
     //PDU Event
     void RaisePilotPositionReceived(PDUPilotPosition pdu);
@@ -83,6 +96,7 @@ signals:
 private:
     void processData(QString data);
     void showError(PDUProtocolError pdu);
+    void readMotd() const;
 private slots:
     void onIncomingData();
     void onAddATCReceived(PDUAddATC pdu);
