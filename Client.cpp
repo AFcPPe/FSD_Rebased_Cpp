@@ -53,6 +53,7 @@ void Client::processData(QString data) {
 
         if (prefixChar == '@') {
             fields[0] = fields[0].mid(1);
+            QtConcurrent::run(&Client::onPilotPositionReceived,this,PDUPilotPosition::fromTokens(fields));
             emit RaisePilotPositionReceived(PDUPilotPosition::fromTokens(fields));
         } else if (prefixChar == '^') {
             fields[0] = fields[0].mid(1);
@@ -156,6 +157,8 @@ void Client::showError(PDUProtocolError pdu) {
 }
 
 void Client::readMotd() {
+//    QThread::sleep(3);
+//    this->socket->write(QString("$SFSERVER:"+this->callsign+":1\r\n").toLocal8Bit());
     for(const auto& line:Global::get().s.qlsMotd){
         this->socket->write(Serialize(PDUTextMessage("server",this->callsign , line)).toLocal8Bit());
     }
@@ -186,4 +189,20 @@ void Client::onAddPilotReceived(PDUAddPilot pdu) {
     qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
     this->clientStatus = Logon;
     emit RaiseMotdToRead();
+}
+
+void Client::onPilotPositionReceived(PDUPilotPosition pdu){
+    qDebug()<<"Received PDU Pilot POS"<<pdu.toTokens();
+    this->location.lon = pdu.Lon;
+    this->location.lat = pdu.Lat;
+    this->squawkCode = pdu.SquawkCode;
+    this->squawkModeC = pdu.SquawkingModeC;
+    this->identing = pdu.Identing;
+    this->trueAltitude = pdu.TrueAltitude;
+    this->pressureAltitude = pdu.PressureAltitude;
+    this->pitch = pdu.Pitch;
+    this->heading = pdu.Heading;
+    this->bank = pdu.Bank;
+    pdu.To = "%1";
+    emit RaiseForwardInfo(this,"@", Serialize(pdu));
 }

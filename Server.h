@@ -9,6 +9,9 @@
 #include <QHostAddress>
 #include "Client.h"
 
+
+
+
 class Server :public QObject{
     Q_OBJECT
 public:
@@ -16,11 +19,14 @@ public:
     QTcpServer *m_server;
     QList<Client*> qlClientPool;
     QTimer qtStatus;
+private:
+    static double calculateDistanceBetweenClients(Client*,Client*);
 
 private slots:
     void onNewConnection();
     void onUserPendingKick(Client *client);
     void onCheckStatus();
+    void onForwardInfoRequest(Client* from,QString to,QString Packet);
 };
 
 

@@ -5,6 +5,11 @@
 #include "Server.h"
 #include "Global.h"
 
+double rad(double d)
+{
+    return d * pi /180.0;
+}
+
 Server::Server() {
     m_server = new QTcpServer;
     m_server->listen(QHostAddress::Any,Global::get().s.usServerPort);
@@ -20,6 +25,7 @@ void Server::onNewConnection() {
         Client *newClient = new Client(socket);
         qlClientPool.append(newClient);
         connect(newClient,&Client::RaiseClientPendingKick,this,&Server::onUserPendingKick);
+        connect(newClient,&Client::RaiseForwardInfo,this,&Server::onForwardInfoRequest);
         qInfo()<<qPrintable(QString("New connection from %1 established").arg(socket->peerAddress().toString()));
     }
 }
@@ -46,5 +52,35 @@ void Server::onCheckStatus() {
             onUserPendingKick(client);
         }
         client->bIsAlive = false;
+    }
+}
+
+double Server::calculateDistanceBetweenClients(Client * A, Client * B) {
+    double a;
+    double b;
+    double radLat1 = rad(A->location.lat);
+    double radLat2 = rad(B->location.lat);
+    a = radLat1 - radLat2;
+    b = rad(A->location.lon) - rad(A->location.lon);
+    double s = 2 * asin(sqrt(pow(sin(a/2),2) + cos(radLat1)*cos(radLat2)*pow(sin(b/2),2)));
+    s = s * EARTH_RADIUS;
+    s = s/1.852;
+    return s;
+}
+
+void Server::onForwardInfoRequest(Client* from,QString to, QString Packet) {
+    if(to=="*"){
+        for(auto client:qlClientPool){
+            if(client == from)continue;
+            if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
+            client->socket->write(Packet.arg(client->callsign).toLocal8Bit());
+        }
+    }
+    if(to=="@"){
+        for(auto client:qlClientPool){
+            if(client == from)continue;
+            if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
+            client->socket->write(Packet.toLocal8Bit());
+        }
     }
 }

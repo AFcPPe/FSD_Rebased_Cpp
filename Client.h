@@ -69,6 +69,16 @@ public:
     ClientLocation location;
     int visualRange;
 
+    //Pilot 的专属属性
+    int squawkCode;
+    bool squawkModeC;
+    bool identing;
+    int trueAltitude;
+    int pressureAltitude;
+    double pitch;
+    double heading;
+    double bank;
+
 signals:
     //PDU Event
     void RaisePilotPositionReceived(PDUPilotPosition pdu);
@@ -96,17 +106,17 @@ signals:
     void RaiseClientPendingKick(Client* client);
     void RaiseErrorToSend(PDUProtocolError pdu);
     void RaiseMotdToRead();
+    void RaiseForwardInfo(Client* from,QString to,QString Packet);
 private:
     void processData(QString data);
 
     void onAddATCReceived(PDUAddATC pdu);
     void onAddPilotReceived(PDUAddPilot pdu);
+    void onPilotPositionReceived(PDUPilotPosition pdu);
 private slots:
     void onIncomingData();
     void showError(PDUProtocolError pdu);
     void readMotd();
-
-
 
 
 };
