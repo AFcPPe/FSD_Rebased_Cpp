@@ -116,9 +116,13 @@ void Client::onAddATCReceived(PDUAddATC pdu) {
         showError(PDUProtocolError("server", pdu.From, NetworkError::InvalidPositionForRating, pdu.CID, "Requested level to high.", true));
         return;
     }
-    qDebug()<<"Correct";
     this->clientStatus = Logon;
-    //TODO: 密码正确的处理
+    this->callsign = pdu.From;
+    this->realName = pdu.RealName;
+    this->cid = pdu.CID;
+    this->rating = pdu.Rating;
+    qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
+    this->readMotd();
 }
 
 void Client::showError(PDUProtocolError pdu) {
@@ -127,5 +131,11 @@ void Client::showError(PDUProtocolError pdu) {
         this->bIsAlive = false;
         this->clientStatus = PendingKick;
         RaiseClientPendingKick(this);
+    }
+}
+
+void Client::readMotd() const {
+    for(const auto& line:Global::get().s.qlsMotd){
+        this->socket->write(Serialize(PDUTextMessage("server",this->callsign , line)).toLocal8Bit());
     }
 }
