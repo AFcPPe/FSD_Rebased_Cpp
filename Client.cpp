@@ -133,6 +133,7 @@ void Client::onAddATCReceived(PDUAddATC pdu) {
         emit RaiseErrorToSend(PDUProtocolError("server", pdu.From, NetworkError::InvalidPositionForRating, pdu.CID, "Requested level to high.", true));
         return;
     }
+    this->clientType = ATC;
     this->clientStatus = Logon;
     this->callsign = pdu.From;
     this->realName = pdu.RealName;
@@ -182,6 +183,7 @@ void Client::onAddPilotReceived(PDUAddPilot pdu) {
         return;
     }
     this->clientStatus = Logon;
+    this->clientType = Pilot;
     this->callsign = pdu.From;
     this->realName = pdu.RealName;
     this->cid = pdu.CID;
@@ -189,10 +191,10 @@ void Client::onAddPilotReceived(PDUAddPilot pdu) {
     qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
     this->clientStatus = Logon;
     emit RaiseMotdToRead();
+    QtConcurrent::run(&Client::updatePilotData,this);
 }
 
 void Client::onPilotPositionReceived(PDUPilotPosition pdu){
-    qDebug()<<"Received PDU Pilot POS"<<pdu.toTokens();
     this->location.lon = pdu.Lon;
     this->location.lat = pdu.Lat;
     this->squawkCode = pdu.SquawkCode;
@@ -205,4 +207,28 @@ void Client::onPilotPositionReceived(PDUPilotPosition pdu){
     this->bank = pdu.Bank;
     pdu.To = "%1";
     emit RaiseForwardInfo(this,"@", Serialize(pdu));
+    QtConcurrent::run(&Client::updatePilotPos,this);
+}
+
+void Client::updatePilotPos() {
+    auto posExpire = Global::get().s.redisSettings.posExpire;
+    Global::get().redis->setHashValue(0,this->callsign,"lat",QString::number(this->location.lat),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"lon",QString::number(this->location.lon),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"squawk",QString::number(squawkCode),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"squawkMode",squawkModeC?"C":"S",posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"ident",squawkModeC?"I":"N",posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"trueAlt",QString::number(this->trueAltitude),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"pressAlt",QString::number(this->pressureAltitude),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"pitch",QString::number(this->pitch),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"bank",QString::number(this->bank),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"heading",QString::number(this->heading),posExpire);
+}
+
+void Client::updatePilotData() {
+    auto posExpire = Global::get().s.redisSettings.posExpire;
+    Global::get().redis->setHashValue(0,this->callsign,"callsign",this->callsign,posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"rating",toQString(this->rating),posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"cid",this->cid,posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"realName",this->realName,posExpire);
+    Global::get().redis->setHashValue(0,this->callsign,"status",QString::number(this->clientStatus),posExpire);
 }

@@ -9,11 +9,13 @@
 
 #include <QtCore>
 #include "Settings.h"
+
 #define pi 3.1415926535897932384626433832795
 #define EARTH_RADIUS 6378.137
 
 class Server;
 class Mysql;
+class Redis;
 
 class Global{
 public:
@@ -22,6 +24,7 @@ public:
     Settings s;
     Server *server;
     Mysql *mysql;
+    Redis* redis;
 };
 
 

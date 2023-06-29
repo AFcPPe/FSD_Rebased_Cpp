@@ -30,12 +30,17 @@ void Settings::load() {
         this->mysqlSettings.address = obj_mysql.value("address").toString();
         this->mysqlSettings.port = obj_mysql.value("port").toInt();
         this->mysqlSettings.db_user = obj_mysql.value("db_user").toString();
-        this->mysqlSettings.db_data = obj_mysql.value("db_data").toString();
         this->mysqlSettings.table_user = obj_mysql.value("table_user").toString();
         this->mysqlSettings.account = obj_mysql.value("account").toString();
         this->mysqlSettings.password = obj_mysql.value("password").toString();
         //读取服务器相关设置
         this->status_check_time = obj_root.value("status_check_time").toInt();
+        //读取Redis信息
+        auto obj_redis = obj_root.value("redis").toObject();
+        this->redisSettings.address = obj_redis.value("host").toString();
+        this->redisSettings.port = obj_redis.value("port").toInt();
+        this->redisSettings.password = obj_redis.value("password").toString();
+        this->redisSettings.posExpire = obj_redis.value("PosExpireTime").toInt();
     }
 
 }

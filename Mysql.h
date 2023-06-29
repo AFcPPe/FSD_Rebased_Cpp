@@ -9,10 +9,6 @@
 #include "Global.h"
 #include "enums.h"
 #include <QSqlQuery>
-enum MysqlStatus{
-    mConnected,
-    mDisconnected
-};
 
 struct UserInfo{
     QString cid;
@@ -28,7 +24,6 @@ public:
     UserInfo getUserInfo(QString cid);
 private:
     QSqlDatabase db_user;
-    MysqlStatus status;
     QSqlQuery queryUser(QString sql);
 private slots:
 

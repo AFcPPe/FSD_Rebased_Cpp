@@ -11,12 +11,14 @@ double rad(double d)
 }
 
 Server::Server() {
+
     m_server = new QTcpServer;
     m_server->listen(QHostAddress::Any,Global::get().s.usServerPort);
     connect(m_server,&QTcpServer::newConnection,this,&Server::onNewConnection);
     qtStatus.setInterval(Global::get().s.status_check_time*1000);
     qtStatus.start();
     connect(&qtStatus,&QTimer::timeout,this,&Server::onCheckStatus);
+    qInfo()<<"Server listening on "<<Global::get().s.usServerPort;
 }
 
 void Server::onNewConnection() {
@@ -31,25 +33,19 @@ void Server::onNewConnection() {
 }
 
 void Server::onUserPendingKick(Client* client) {
-
     int index = qlClientPool.indexOf(client);
     if(index!=-1){
-        QThread::msleep(1000);
         qInfo()<<qPrintable(QString("Connection is destroyed by the server. IP: %1").arg(qlClientPool.value(index)->socket->peerAddress().toString()));
         qlClientPool.value(index)->socket->deleteLater();
         qlClientPool.removeAt(index);
         if(client->clientStatus!=Connected){
-            qDebug()<<"Send";
             if(client->clientType==Pilot){
-                qDebug()<<"SentDP";
                 onForwardInfoRequest(client,"@", Serialize(PDUDeletePilot(client->callsign,client->cid)));
             } else
             if(client->clientType==ATC){
-                qDebug()<<"SentDA";
                 onForwardInfoRequest(client,"@", Serialize(PDUDeleteATC(client->callsign,client->cid)));
             }
         }
-
         delete client;
     }
 }

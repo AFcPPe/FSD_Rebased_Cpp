@@ -20,12 +20,20 @@ struct MysqlSettings{
     QString db_data;
 };
 
+struct RedisSettings{
+    QString address;
+    int port;
+    QString password;
+    int posExpire;
+};
+
 class Settings {
 public:
     QList<QString> qlsMotd;
     unsigned short usServerPort = 6809;
     int status_check_time = 15;
     MysqlSettings mysqlSettings;
+    RedisSettings redisSettings;
     void load();
     Settings();
 };

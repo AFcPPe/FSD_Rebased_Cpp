@@ -3,7 +3,7 @@
 #include "Global.h"
 #include "Server.h"
 #include "Mysql.h"
-
+#include "Redis.h"
 
 void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -32,7 +32,6 @@ void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
         case QtInfoMsg:
             text = QString("INFO");
     }
-//    QString context_info = QString("File:(%1) Line:(%2)").arg(QString(context.file)).arg(context.line);
     QString current_date_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
     QString current_date = QString("%1").arg(current_date_time);
     QString message = QString("[%2] [%1]: %3").arg(text,current_date, msg);
@@ -50,7 +49,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
     //注册日志系统
     qInstallMessageHandler(log);
-    qInfo()<<"SKYline FSD Starting";
+    qInfo()<<"SKYline FSD starting";
     qInfo()<<"Loading Settings";
     //创建全局对象
     Global::g_global_struct = new Global();
@@ -60,8 +59,14 @@ int main(int argc, char *argv[]) {
     //连接Mysql服务器
     qInfo()<<"Connecting to Mysql Server";
     Global::get().mysql = new Mysql();
+    //连接Redis
+    qInfo()<<"Connecting to Redis Server";
+    Global::get().redis = new Redis();
     //创建服务器
+    qInfo()<<"Initializing Server.";
     Global::get().server = new Server();
+
+
 
     return QCoreApplication::exec();
 }

@@ -34,6 +34,7 @@
 #include "Global.h"
 #include "Mysql.h"
 #include <QtConcurrent/QtConcurrent>
+#include "Redis.h"
 
 enum ClientStatus{
     Connected,
@@ -78,6 +79,11 @@ public:
     double pitch;
     double heading;
     double bank;
+
+    //Pilot数据更新
+    void updatePilotPos();
+    void updatePilotData();
+    void updatePilotFP();
 
 signals:
     //PDU Event
