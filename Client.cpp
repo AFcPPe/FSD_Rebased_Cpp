@@ -48,6 +48,11 @@ void Client::processData(QString data) {
 
     for (const auto &packet: packets) {
         if (packet.length() == 0) continue;
+        if(this->clientStatus==Connected&&packet.length()>=3&&packet.left(3)!="#AA"&&packet.left(3)!="#AP"){
+            qDebug("RH");
+            m_partialPacket = packet+PDUBase::PacketDelimeter+m_partialPacket;
+            continue;
+        }
         QStringList fields = packet.split(PDUBase::Delimeter);
         const QChar prefixChar = fields[0][0];
 
@@ -141,8 +146,9 @@ void Client::onAddATCReceived(PDUAddATC pdu) {
     this->cid = pdu.CID;
     this->rating = pdu.Rating;
     qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
-    this->clientStatus = Logon;
     emit RaiseMotdToRead();
+    QtConcurrent::run(&Client::updateATCData,this);
+    processData("\r\n");
 }
 
 void Client::showError(PDUProtocolError pdu) {
@@ -190,12 +196,13 @@ void Client::onAddPilotReceived(PDUAddPilot pdu) {
     this->cid = pdu.CID;
     this->rating = pdu.Rating;
     qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
-    this->clientStatus = Logon;
     emit RaiseMotdToRead();
     QtConcurrent::run(&Client::updatePilotData,this);
+    processData("\r\n");
 }
 
 void Client::onPilotPositionReceived(PDUPilotPosition pdu){
+    if(this->clientStatus==Connected)return;
     this->location.lon = pdu.Lon;
     this->location.lat = pdu.Lat;
     this->squawkCode = pdu.SquawkCode;
@@ -235,6 +242,7 @@ void Client::updatePilotData() {
 }
 
 void Client::onATCPositionReceived(PDUATCPosition pdu) {
+    if(this->clientStatus==Connected)return;
     this->location.lon = pdu.Lon;
     this->location.lat = pdu.Lat;
     this->facility = pdu.Facility;
@@ -242,5 +250,30 @@ void Client::onATCPositionReceived(PDUATCPosition pdu) {
     this->visualRange = pdu.VisibilityRange;
     pdu.To = "%1";
     emit RaiseForwardInfo(this,"@", Serialize(pdu));
-    QtConcurrent::run(&Client::updatePilotPos,this);
+    QtConcurrent::run(&Client::updateATCPos,this);
+}
+
+void Client::updateATCData() {
+    auto posExpire = Global::get().s.redisSettings.posExpire;
+    Global::get().redis->setHashValue(1,this->callsign,"callsign",this->callsign,posExpire);
+    Global::get().redis->setHashValue(1,this->callsign,"rating",toQString(this->rating),posExpire);
+    Global::get().redis->setHashValue(1,this->callsign,"cid",this->cid,posExpire);
+    Global::get().redis->setHashValue(1,this->callsign,"realName",this->realName,posExpire);
+    Global::get().redis->setHashValue(1,this->callsign,"status",QString::number(this->clientStatus),posExpire);
+
+}
+
+void Client::updateATCPos()
+{
+    auto posExpire = Global::get().s.redisSettings.posExpire;
+    Global::get().redis->setHashValue(1,this->callsign,"lat",QString::number(this->location.lat),posExpire);
+    Global::get().redis->setHashValue(1,this->callsign,"lon",QString::number(this->location.lon),posExpire);
+    Global::get().redis->setHashValue(1,this->callsign,"facility",QString::number((int)this->facility),posExpire);
+    QStringList freqs;
+    for(auto &freq : frequencies) {
+        freqs.append(QString::number(freq/1000.0,'f',3));
+    }
+    Global::get().redis->setHashValue(1,this->callsign,"frequencies",freqs.join(","),posExpire);
+    Global::get().redis->setHashValue(1,this->callsign,"visualRange",QString::number(visualRange),posExpire);
+
 }

@@ -11,6 +11,7 @@ Redis::Redis() {
         qFatal()<<"Failed to connect to Redis. Shutting down the server. Please check network and redis settings.";
         exit(1002);
     } else {
+        redisSetTimeout(c, {1,500000});
         qInfo()<<"Connected to Redis.";
         qInfo()<<"Authenticating to Redis server.";
         auto reply = (redisReply*)redisCommand(c,"AUTH %s",Global::get().s.redisSettings.password.toStdString().c_str());
@@ -24,15 +25,15 @@ Redis::Redis() {
 
 bool Redis::setHashValue(int db,QString key, QString field, QString value,int expire) {
     auto reply = (redisReply*)redisCommand(c,QString("SELECT %1").arg(db).toStdString().c_str());
-    if(reply->type == REDIS_REPLY_ERROR){
+    if(reply==NULL||reply->type == REDIS_REPLY_ERROR){
         return false;
     }
     reply = (redisReply*)redisCommand(c,QString("HSET %1 %2 %s").arg(key,field).toStdString().c_str(),value.toStdString().c_str());
-    if(reply->type == REDIS_REPLY_ERROR){
+    if(reply==NULL||reply->type == REDIS_REPLY_ERROR){
         return false;
     }
     reply = (redisReply*)redisCommand(c,QString("expire %1 %2").arg(key).arg(expire).toStdString().c_str());
-    if(reply->type == REDIS_REPLY_ERROR){
+    if(reply==NULL||reply->type == REDIS_REPLY_ERROR){
         return false;
     }
     return true;
@@ -40,11 +41,11 @@ bool Redis::setHashValue(int db,QString key, QString field, QString value,int ex
 
 QString Redis::getHashValue(int db, QString key, QString field) {
     auto reply = (redisReply*)redisCommand(c,QString("SELECT %1").arg(db).toStdString().c_str());
-    if(reply->type == REDIS_REPLY_ERROR){
+    if(reply==NULL||reply->type == REDIS_REPLY_ERROR){
         return "";
     }
     reply = (redisReply*)redisCommand(c,QString("HGET %1 %2").arg(key).arg(key,field).toStdString().c_str());
-    if(reply->type == REDIS_REPLY_ERROR){
+    if(reply==NULL||reply->type == REDIS_REPLY_ERROR){
         return "";
     }
     return {reply->str};

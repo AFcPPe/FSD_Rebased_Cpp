@@ -89,6 +89,11 @@ public:
     void updatePilotData();
     void updatePilotFP();
 
+    //ATC数据更新
+    void updateATCPos();
+    void updateATCData();
+
+
 signals:
     //PDU Event
     void RaisePilotPositionReceived(PDUPilotPosition pdu);
