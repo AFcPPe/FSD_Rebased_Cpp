@@ -70,7 +70,7 @@ public:
     ClientLocation location;
     int visualRange;
 
-    //Pilot 的专属属性
+    //Pilot的专属属性
     int squawkCode;
     bool squawkModeC;
     bool identing;
@@ -79,6 +79,10 @@ public:
     double pitch;
     double heading;
     double bank;
+
+    //ATC的专属属性
+    NetworkFacility facility;
+    QList<int> frequencies;
 
     //Pilot数据更新
     void updatePilotPos();
@@ -119,6 +123,7 @@ private:
     void onAddATCReceived(PDUAddATC pdu);
     void onAddPilotReceived(PDUAddPilot pdu);
     void onPilotPositionReceived(PDUPilotPosition pdu);
+    void onATCPositionReceived(PDUATCPosition pdu);
 private slots:
     void onIncomingData();
     void showError(PDUProtocolError pdu);

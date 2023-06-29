@@ -36,7 +36,7 @@ QStringList PDUATCPosition::toTokens() const
 {
     QStringList freqs;
     for(auto &freq : Frequencies) {
-        freqs.append(QString::number(freq));
+        freqs.append(QString::number(freq-100000));
     }
 
     QStringList tokens;

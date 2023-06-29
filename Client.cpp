@@ -60,6 +60,7 @@ void Client::processData(QString data) {
             emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(FastPilotPositionType::Fast, fields));
         } else if (prefixChar == '%') {
             fields[0] = fields[0].mid(1);
+            QtConcurrent::run(&Client::onATCPositionReceived,this,PDUATCPosition::fromTokens(fields));
             emit RaiseATCPositionReceived(PDUATCPosition::fromTokens(fields));
         } else if (prefixChar == '#' || prefixChar == '$') {
             if (fields[0].length() < 3) {
@@ -231,4 +232,15 @@ void Client::updatePilotData() {
     Global::get().redis->setHashValue(0,this->callsign,"cid",this->cid,posExpire);
     Global::get().redis->setHashValue(0,this->callsign,"realName",this->realName,posExpire);
     Global::get().redis->setHashValue(0,this->callsign,"status",QString::number(this->clientStatus),posExpire);
+}
+
+void Client::onATCPositionReceived(PDUATCPosition pdu) {
+    this->location.lon = pdu.Lon;
+    this->location.lat = pdu.Lat;
+    this->facility = pdu.Facility;
+    this->frequencies = pdu.Frequencies;
+    this->visualRange = pdu.VisibilityRange;
+    pdu.To = "%1";
+    emit RaiseForwardInfo(this,"@", Serialize(pdu));
+    QtConcurrent::run(&Client::updatePilotPos,this);
 }
