@@ -17,7 +17,7 @@ QStringList PDUAddATC::toTokens() const
 {
     QStringList tokens;
     tokens.append(From);
-    tokens.append(PDUBase::ServerCallsign);
+    tokens.append(To);
     tokens.append(RealName);
     tokens.append(CID);
     tokens.append(Password);

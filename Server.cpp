@@ -83,12 +83,33 @@ void Server::onForwardInfoRequest(Client* from,QString to, QString Packet) {
             if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
             client->socket->write(Packet.arg(client->callsign).toLocal8Bit());
         }
+        return;
     }
     if(to=="@"){
         for(auto client:qlClientPool){
             if(client == from)continue;
             if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
+
             client->socket->write(Packet.toLocal8Bit());
         }
+        return;
+    }
+    if(to=="*A"){
+        for(auto client:qlClientPool){
+            if(client == from)continue;
+            if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
+            if(client->clientType == Pilot) continue;
+            client->socket->write(Packet.toLocal8Bit());
+        }
+        return;
+    }
+    if(to=="*P"){
+        for(auto client:qlClientPool){
+            if(client == from)continue;
+            if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
+            if(client->clientType == ATC) continue;
+            client->socket->write(Packet.toLocal8Bit());
+        }
+        return;
     }
 }

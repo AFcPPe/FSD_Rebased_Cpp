@@ -31,6 +31,7 @@
 #include "pdu/pdu/pdu_metar_response.h"
 #include "pdu/pdu/pdu_metar_request.h"
 #include "pdu/pdu/pdu_send_fast.h"
+#include "pdu/pdu/pdu_flight_plan.h"
 #include "Global.h"
 #include "Mysql.h"
 #include <QtConcurrent/QtConcurrent>
@@ -51,6 +52,24 @@ enum ClientType{
 struct ClientLocation{
     double lat;
     double lon;
+};
+
+struct FlightPlan {
+    FlightRules flightRule;
+    QString type;
+    int tas;
+    QString dep;
+    int depTime;
+    int actualDepTime;
+    QString cruiseAlt;
+    QString dest;
+    int enrouteHour;
+    int enrouteMin;
+    int fobHour;
+    int fobMin;
+    QString alterDest;
+    QString remark;
+    QString route;
 };
 
 class Client: public QObject{
@@ -79,6 +98,7 @@ public:
     double pitch;
     double heading;
     double bank;
+    FlightPlan flightPlan;
 
     //ATC的专属属性
     NetworkFacility facility;
@@ -97,6 +117,7 @@ public:
 signals:
     //PDU Event
     void RaisePilotPositionReceived(PDUPilotPosition pdu);
+    void RaiseFlightPlanReceived(PDUFlightPlan pdu);
     void RaiseFastPilotPositionReceived(PDUFastPilotPosition pdu);
     void RaiseATCPositionReceived(PDUATCPosition pdu);
     void RaiseAddATCReceived(PDUAddATC pdu);
@@ -129,6 +150,7 @@ private:
     void onAddPilotReceived(PDUAddPilot pdu);
     void onPilotPositionReceived(PDUPilotPosition pdu);
     void onATCPositionReceived(PDUATCPosition pdu);
+    void onFlightPlanReceived(PDUFlightPlan pdu);
 private slots:
     void onIncomingData();
     void showError(PDUProtocolError pdu);

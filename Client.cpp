@@ -49,7 +49,6 @@ void Client::processData(QString data) {
     for (const auto &packet: packets) {
         if (packet.length() == 0) continue;
         if(this->clientStatus==Connected&&packet.length()>=3&&packet.left(3)!="#AA"&&packet.left(3)!="#AP"){
-            qDebug("RH");
             m_partialPacket = packet+PDUBase::PacketDelimeter+m_partialPacket;
             continue;
         }
@@ -97,7 +96,10 @@ void Client::processData(QString data) {
                         }
                     }
                 }
-            } else if (pduTypeId == "$PI") {
+            }else if (pduTypeId == "$FP") {
+                emit RaiseFlightPlanReceived(PDUFlightPlan::fromTokens(fields));
+                QtConcurrent::run(&Client::onFlightPlanReceived,this,PDUFlightPlan::fromTokens(fields));
+            }else if (pduTypeId == "$PI") {
                 emit RaisePingReceived(PDUPing::fromTokens(fields));
             } else if (pduTypeId == "$PO") {
                 emit RaisePongReceived(PDUPong::fromTokens(fields));
@@ -276,4 +278,24 @@ void Client::updateATCPos()
     Global::get().redis->setHashValue(1,this->callsign,"frequencies",freqs.join(","),posExpire);
     Global::get().redis->setHashValue(1,this->callsign,"visualRange",QString::number(visualRange),posExpire);
 
+}
+
+void Client::onFlightPlanReceived(PDUFlightPlan pdu) {
+    flightPlan.flightRule = pdu.FlightRule;
+    flightPlan.type = pdu.Type;
+    flightPlan.tas = pdu.Tas;
+    flightPlan.dep = pdu.Dep;
+    flightPlan.depTime = pdu.DepTime;
+    flightPlan.actualDepTime = pdu.ActualDepTime;
+    flightPlan.cruiseAlt = pdu.CruiseAlt;
+    flightPlan.dest = pdu.Dest;
+    flightPlan.enrouteHour = pdu.EnrouteHour;
+    flightPlan.enrouteMin = pdu.EnrouteMin;
+    flightPlan.fobHour = pdu.FobHour;
+    flightPlan.fobMin = pdu.FobMin;
+    flightPlan.alterDest = pdu.AlterDest;
+    flightPlan.remark = pdu.Remark;
+    flightPlan.route = pdu.Route;
+    pdu.To = "*A";
+    emit RaiseForwardInfo(this,"*A", Serialize(pdu));
 }

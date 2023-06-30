@@ -20,7 +20,7 @@ QStringList PDUAddPilot::toTokens() const
     QStringList tokens;
 
     tokens.append(From);
-    tokens.append(PDUBase::ServerCallsign);
+    tokens.append(To);
     tokens.append(CID);
     tokens.append(Password);
     tokens.append(toQString(Rating));
