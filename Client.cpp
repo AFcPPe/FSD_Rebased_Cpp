@@ -104,6 +104,7 @@ void Client::processData(QString data) {
             } else if (pduTypeId == "$PO") {
                 emit RaisePongReceived(PDUPong::fromTokens(fields));
             } else if (pduTypeId == "$CQ") {
+                QtConcurrent::run(&Client::onClientQueryReceived,this,PDUClientQuery::fromTokens(fields));
                 emit RaiseClientQueryReceived(PDUClientQuery::fromTokens(fields));
             } else if (pduTypeId == "$CR") {
                 emit RaiseClientQueryResponseReceived(PDUClientQueryResponse::fromTokens(fields));
@@ -298,4 +299,12 @@ void Client::onFlightPlanReceived(PDUFlightPlan pdu) {
     flightPlan.route = pdu.Route;
     pdu.To = "*A";
     emit RaiseForwardInfo(this,"*A", Serialize(pdu));
+}
+
+void Client::onClientQueryReceived(PDUClientQuery pdu) {
+    if(pdu.To.toLower() == "server"){
+        emit RaiseQueryToResponse(this,pdu);
+        return;
+    }
+    emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
 }

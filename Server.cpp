@@ -28,6 +28,7 @@ void Server::onNewConnection() {
         qlClientPool.append(newClient);
         connect(newClient,&Client::RaiseClientPendingKick,this,&Server::onUserPendingKick);
         connect(newClient,&Client::RaiseForwardInfo,this,&Server::onForwardInfoRequest);
+        connect(newClient,&Client::RaiseQueryToResponse,this,&Server::onQueryToReqsonse);
         qInfo()<<qPrintable(QString("New connection from %1 established").arg(socket->peerAddress().toString()));
     }
 }
@@ -111,5 +112,21 @@ void Server::onForwardInfoRequest(Client* from,QString to, QString Packet) {
             client->socket->write(Packet.toLocal8Bit());
         }
         return;
+    }
+}
+
+void Server::onQueryToReqsonse(Client *from, PDUClientQuery pdu) {
+    if(pdu.QueryType == ClientQueryType::FlightPlan){
+        for(auto client: qlClientPool){
+            if(client->callsign == pdu.Payload[0]){
+                qDebug()<<Serialize(PDUFlightPlan(client->callsign, from->callsign, client->flightPlan.flightRule, client->flightPlan.type, client->flightPlan.tas, client->flightPlan.dep,
+                                                  client->flightPlan.depTime, client->flightPlan.actualDepTime, client->flightPlan.cruiseAlt, client->flightPlan.dest, client->flightPlan.enrouteHour,
+                                                  client->flightPlan.enrouteMin, client->flightPlan.fobHour,client->flightPlan.fobMin,client->flightPlan.alterDest,client->flightPlan.remark, client->flightPlan.route));
+                from->socket->write(Serialize(PDUFlightPlan(client->callsign, from->callsign, client->flightPlan.flightRule, client->flightPlan.type, client->flightPlan.tas, client->flightPlan.dep,
+                                                            client->flightPlan.depTime, client->flightPlan.actualDepTime, client->flightPlan.cruiseAlt, client->flightPlan.dest, client->flightPlan.enrouteHour,
+                                                            client->flightPlan.enrouteMin, client->flightPlan.fobHour,client->flightPlan.fobMin,client->flightPlan.alterDest,client->flightPlan.remark, client->flightPlan.route)).toLocal8Bit());
+                return;
+            }
+        }
     }
 }

@@ -11,7 +11,7 @@ Redis::Redis() {
         qFatal()<<"Failed to connect to Redis. Shutting down the server. Please check network and redis settings.";
         exit(1002);
     } else {
-        redisSetTimeout(c, {1,500000});
+        redisSetTimeout(c, {2,500000});
         qInfo()<<"Connected to Redis.";
         qInfo()<<"Authenticating to Redis server.";
         auto reply = (redisReply*)redisCommand(c,"AUTH %s",Global::get().s.redisSettings.password.toStdString().c_str());

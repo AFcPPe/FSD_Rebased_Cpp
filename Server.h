@@ -27,6 +27,7 @@ private slots:
     void onUserPendingKick(Client *client);
     void onCheckStatus();
     void onForwardInfoRequest(Client* from,QString to,QString Packet);
+    void onQueryToReqsonse(Client* from,PDUClientQuery pdu);
 };
 
 

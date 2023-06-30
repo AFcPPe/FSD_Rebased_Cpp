@@ -143,6 +143,7 @@ signals:
     void RaiseErrorToSend(PDUProtocolError pdu);
     void RaiseMotdToRead();
     void RaiseForwardInfo(Client* from,QString to,QString Packet);
+    void RaiseQueryToResponse(Client* client, PDUClientQuery);
 private:
     void processData(QString data);
 
@@ -151,12 +152,11 @@ private:
     void onPilotPositionReceived(PDUPilotPosition pdu);
     void onATCPositionReceived(PDUATCPosition pdu);
     void onFlightPlanReceived(PDUFlightPlan pdu);
+    void onClientQueryReceived(PDUClientQuery pdu);
 private slots:
     void onIncomingData();
     void showError(PDUProtocolError pdu);
     void readMotd();
-
-
 };
 
 
