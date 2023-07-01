@@ -35,6 +35,7 @@
 #include "Global.h"
 #include "Mysql.h"
 #include <QtConcurrent/QtConcurrent>
+#include "Weather.h"
 
 enum ClientStatus{
     Connected,
@@ -127,6 +128,7 @@ signals:
     void RaiseKillRequestReceived(PDUKillRequest pdu);
     void RaiseProtocolErrorReceived(PDUProtocolError pdu);
     void RaiseSendFastReceived(PDUSendFast pdu);
+    void RaiseMetarRequestReceived(PDUMetarRequest pdu);
     //OuterEvent
     void RaiseClientPendingKick(Client* client);
     void RaiseErrorToSend(PDUProtocolError pdu);
@@ -143,10 +145,12 @@ private:
     void onFlightPlanReceived(PDUFlightPlan pdu);
     void onClientQueryReceived(PDUClientQuery pdu);
 
+
 private slots:
     void onIncomingData();
     void showError(PDUProtocolError pdu);
     void readMotd();
+    void onMetarRequestReceived(PDUMetarRequest pdu);
 };
 
 

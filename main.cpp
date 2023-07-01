@@ -3,6 +3,7 @@
 #include "Global.h"
 #include "Server.h"
 #include "Mysql.h"
+#include "Weather.h"
 
 void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -58,11 +59,12 @@ int main(int argc, char *argv[]) {
     //连接Mysql服务器
     qInfo()<<"Connecting to Mysql Server";
     Global::get().mysql = new Mysql();
+    //创建Weather对象
+    qInfo()<<"Creating Weather Manager";
+    Global::get().weather = new Weather();
+    Global::get().weather->UpdateWeather();
     //创建服务器
     qInfo()<<"Initializing Server.";
     Global::get().server = new Server();
-
-
-
     return QCoreApplication::exec();
 }

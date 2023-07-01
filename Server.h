@@ -19,6 +19,7 @@ public:
     QTcpServer *m_server;
     QList<Client*> qlClientPool;
     QTimer qtStatus;
+    QTimer metarTimer;
 private:
     static double calculateDistanceBetweenClients(Client*,Client*);
 

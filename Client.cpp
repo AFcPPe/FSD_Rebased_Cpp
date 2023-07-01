@@ -12,6 +12,7 @@ Client::Client(QTcpSocket *s) {
     connect(s, &QTcpSocket::readyRead, this, &Client::onIncomingData);
     connect(this,&Client::RaiseErrorToSend,this,&Client::showError);
     connect(this,&Client::RaiseMotdToRead,this,&Client::readMotd);
+    connect(this,&Client::RaiseMetarRequestReceived,this,&Client::onMetarRequestReceived);
     //主动断开socket
     connect(s,&QAbstractSocket::disconnected,this,[&]{
         if(this->clientStatus== Connected){
@@ -96,11 +97,14 @@ void Client::processData(QString data) {
                         }
                     }
                 }
-            }else if (pduTypeId == "$FP") {
+            } else if (pduTypeId == "$FP") {
                 emit RaiseFlightPlanReceived(PDUFlightPlan::fromTokens(fields));
                 QtConcurrent::run(&Client::onFlightPlanReceived,this,PDUFlightPlan::fromTokens(fields));
-            }else if (pduTypeId == "$PI") {
+            } else if (pduTypeId == "$PI") {
                 emit RaisePingReceived(PDUPing::fromTokens(fields));
+            } else if (pduTypeId == "$AX") {
+
+                emit RaiseMetarRequestReceived(PDUMetarRequest::fromTokens(fields));
             } else if (pduTypeId == "$PO") {
                 emit RaisePongReceived(PDUPong::fromTokens(fields));
             } else if (pduTypeId == "$CQ") {
@@ -256,4 +260,9 @@ void Client::onClientQueryReceived(PDUClientQuery pdu) {
         return;
     }
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+}
+
+void Client::onMetarRequestReceived(PDUMetarRequest pdu) {
+    QString metar = Global::get().weather->getMetar(pdu.Station);
+    socket->write(Serialize(PDUMetarResponse(this->callsign,metar)).toLocal8Bit());
 }

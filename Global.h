@@ -16,6 +16,7 @@
 class Server;
 class Mysql;
 class Redis;
+class Weather;
 
 class Global{
 public:
@@ -25,6 +26,7 @@ public:
     Server *server;
     Mysql *mysql;
     Redis* redis;
+    Weather* weather;
 };
 
 

@@ -26,6 +26,8 @@ public:
     unsigned short usServerPort = 6809;
     int status_check_time = 15;
     MysqlSettings mysqlSettings;
+    int MetarRefreshTime;
+    QString MetarRefreshUrl;
     void load();
     Settings();
 };

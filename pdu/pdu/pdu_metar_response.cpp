@@ -15,6 +15,7 @@ QStringList PDUMetarResponse::toTokens() const
     QStringList tokens;
     tokens.append(From);
     tokens.append(To);
+    tokens.append("METAR");
     tokens.append(Metar);
     return tokens;
 }
@@ -25,5 +26,5 @@ PDUMetarResponse PDUMetarResponse::fromTokens(const QStringList &tokens)
         throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
-    return PDUMetarResponse(tokens[1], tokens[3]);
+    return PDUMetarResponse(tokens[1],tokens[3]);
 }

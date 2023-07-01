@@ -4,6 +4,7 @@
 
 #include "Server.h"
 #include "Global.h"
+#include "Weather.h"
 
 double rad(double d)
 {
@@ -11,7 +12,6 @@ double rad(double d)
 }
 
 Server::Server() {
-
     m_server = new QTcpServer;
     m_server->listen(QHostAddress::Any,Global::get().s.usServerPort);
     connect(m_server,&QTcpServer::newConnection,this,&Server::onNewConnection);
@@ -19,6 +19,10 @@ Server::Server() {
     qtStatus.start();
     connect(&qtStatus,&QTimer::timeout,this,&Server::onCheckStatus);
     qInfo()<<"Server listening on "<<Global::get().s.usServerPort;
+    metarTimer.start(Global::get().s.MetarRefreshTime*1000*60);
+    connect(&metarTimer,&QTimer::timeout,this,[&]{
+        QtConcurrent::run(&Weather::UpdateWeather,Global::get().weather);
+    });
 }
 
 void Server::onNewConnection() {

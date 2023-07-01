@@ -36,6 +36,9 @@ void Settings::load() {
         this->mysqlSettings.password = obj_mysql.value("password").toString();
         //读取服务器相关设置
         this->status_check_time = obj_root.value("status_check_time").toInt();
+        //读取Metar设置
+        this->MetarRefreshTime = obj_root.value("MetarRefreshTime").toInt();
+        this->MetarRefreshUrl = obj_root.value("MetarRefreshUrl").toString();
     }
 
 }

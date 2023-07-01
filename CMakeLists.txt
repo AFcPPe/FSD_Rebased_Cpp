@@ -73,7 +73,7 @@ add_executable(FSD_Rebased
         pdu/pdu/pdu_send_fast.h
         pdu/pdu/pdu_text_message.cpp
         pdu/pdu/pdu_text_message.h
-        pdu/pdu/pdu_flight_plan.cpp)
+        pdu/pdu/pdu_flight_plan.cpp Weather.cpp Weather.h)
 target_link_libraries(FSD_Rebased
         Qt::Core
         Qt::Network
