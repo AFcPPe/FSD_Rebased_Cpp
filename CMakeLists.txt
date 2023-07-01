@@ -8,9 +8,6 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_PREFIX_PATH "D:/Qt/6.5.1/mingw_64/lib/cmake")
 #add_subdirectory(Hiredis)
-
-link_directories(${PROJECT_SOURCE_DIR}/redis++/lib)
-include_directories(${PROJECT_SOURCE_DIR}/redis++/include)
 find_package(Qt6 COMPONENTS
         Core
         Network
@@ -76,14 +73,12 @@ add_executable(FSD_Rebased
         pdu/pdu/pdu_send_fast.h
         pdu/pdu/pdu_text_message.cpp
         pdu/pdu/pdu_text_message.h
-        Redis.cpp Redis.h pdu/pdu/pdu_flight_plan.cpp)
+        pdu/pdu/pdu_flight_plan.cpp)
 target_link_libraries(FSD_Rebased
         Qt::Core
         Qt::Network
         Qt::Sql
         Qt::Concurrent
-        libredis++.dll.a
-        libhiredis.dll.a
         )
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)

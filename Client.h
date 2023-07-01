@@ -35,7 +35,6 @@
 #include "Global.h"
 #include "Mysql.h"
 #include <QtConcurrent/QtConcurrent>
-#include "Redis.h"
 
 enum ClientStatus{
     Connected,
@@ -104,16 +103,6 @@ public:
     NetworkFacility facility;
     QList<int> frequencies;
 
-    //Pilot数据更新
-    void updatePilotPos();
-    void updatePilotData();
-    void updatePilotFP();
-
-    //ATC数据更新
-    void updateATCPos();
-    void updateATCData();
-
-
 signals:
     //PDU Event
     void RaisePilotPositionReceived(PDUPilotPosition pdu);
@@ -154,7 +143,6 @@ private:
     void onFlightPlanReceived(PDUFlightPlan pdu);
     void onClientQueryReceived(PDUClientQuery pdu);
 
-    void uploadFlightPlan();
 private slots:
     void onIncomingData();
     void showError(PDUProtocolError pdu);

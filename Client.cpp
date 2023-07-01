@@ -150,7 +150,6 @@ void Client::onAddATCReceived(PDUAddATC pdu) {
     this->rating = pdu.Rating;
     qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
     emit RaiseMotdToRead();
-    QtConcurrent::run(&Client::updateATCData,this);
     processData("\r\n");
 }
 
@@ -200,7 +199,6 @@ void Client::onAddPilotReceived(PDUAddPilot pdu) {
     this->rating = pdu.Rating;
     qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
     emit RaiseMotdToRead();
-    QtConcurrent::run(&Client::updatePilotData,this);
     processData("\r\n");
     //TODO: 飞行计划的下载
 }
@@ -219,30 +217,6 @@ void Client::onPilotPositionReceived(PDUPilotPosition pdu){
     this->bank = pdu.Bank;
     pdu.To = "%1";
     emit RaiseForwardInfo(this,"@", Serialize(pdu));
-    QtConcurrent::run(&Client::updatePilotPos,this);
-}
-
-void Client::updatePilotPos() {
-    auto posExpire = Global::get().s.redisSettings.posExpire;
-    Global::get().redis->setHashValue(0,this->callsign,"lat",QString::number(this->location.lat),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"lon",QString::number(this->location.lon),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"squawk",QString::number(squawkCode),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"squawkMode",squawkModeC?"C":"S",posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"ident",squawkModeC?"I":"N",posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"trueAlt",QString::number(this->trueAltitude),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"pressAlt",QString::number(this->pressureAltitude),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"pitch",QString::number(this->pitch),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"bank",QString::number(this->bank),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"heading",QString::number(this->heading),posExpire);
-}
-
-void Client::updatePilotData() {
-    auto posExpire = Global::get().s.redisSettings.posExpire;
-    Global::get().redis->setHashValue(0,this->callsign,"callsign",this->callsign,posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"rating",toQString(this->rating),posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"cid",this->cid,posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"realName",this->realName,posExpire);
-    Global::get().redis->setHashValue(0,this->callsign,"status",QString::number(this->clientStatus),posExpire);
 }
 
 void Client::onATCPositionReceived(PDUATCPosition pdu) {
@@ -254,32 +228,6 @@ void Client::onATCPositionReceived(PDUATCPosition pdu) {
     this->visualRange = pdu.VisibilityRange;
     pdu.To = "%1";
     emit RaiseForwardInfo(this,"@", Serialize(pdu));
-    QtConcurrent::run(&Client::updateATCPos,this);
-}
-
-void Client::updateATCData() {
-    auto posExpire = Global::get().s.redisSettings.posExpire;
-    Global::get().redis->setHashValue(1,this->callsign,"callsign",this->callsign,posExpire);
-    Global::get().redis->setHashValue(1,this->callsign,"rating",toQString(this->rating),posExpire);
-    Global::get().redis->setHashValue(1,this->callsign,"cid",this->cid,posExpire);
-    Global::get().redis->setHashValue(1,this->callsign,"realName",this->realName,posExpire);
-    Global::get().redis->setHashValue(1,this->callsign,"status",QString::number(this->clientStatus),posExpire);
-
-}
-
-void Client::updateATCPos()
-{
-    auto posExpire = Global::get().s.redisSettings.posExpire;
-    Global::get().redis->setHashValue(1,this->callsign,"lat",QString::number(this->location.lat),posExpire);
-    Global::get().redis->setHashValue(1,this->callsign,"lon",QString::number(this->location.lon),posExpire);
-    Global::get().redis->setHashValue(1,this->callsign,"facility",QString::number((int)this->facility),posExpire);
-    QStringList freqs;
-    for(auto &freq : frequencies) {
-        freqs.append(QString::number(freq/1000.0,'f',3));
-    }
-    Global::get().redis->setHashValue(1,this->callsign,"frequencies",freqs.join(","),posExpire);
-    Global::get().redis->setHashValue(1,this->callsign,"visualRange",QString::number(visualRange),posExpire);
-
 }
 
 void Client::onFlightPlanReceived(PDUFlightPlan pdu) {
@@ -300,7 +248,6 @@ void Client::onFlightPlanReceived(PDUFlightPlan pdu) {
     flightPlan.route = pdu.Route;
     pdu.To = "*A";
     emit RaiseForwardInfo(this,"*A", Serialize(pdu));
-    //TODO：飞机计划的上传
 }
 
 void Client::onClientQueryReceived(PDUClientQuery pdu) {
@@ -309,23 +256,4 @@ void Client::onClientQueryReceived(PDUClientQuery pdu) {
         return;
     }
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
-}
-
-void Client::uploadFlightPlan() {
-    int expt = Global::get().s.redisSettings.flightPlanExpireTime;
-    Global::get().redis->setHashValue(2, this->callsign, "flightRule", toQString(flightPlan.flightRule), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "type", flightPlan.type, expt);
-    Global::get().redis->setHashValue(2, this->callsign, "tas", QString::number(flightPlan.tas), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "dep", flightPlan.dep, expt);
-    Global::get().redis->setHashValue(2, this->callsign, "depTime", QString::number(flightPlan.depTime), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "actualDepTime", QString::number(flightPlan.actualDepTime), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "cruiseAlt", flightPlan.cruiseAlt, expt);
-    Global::get().redis->setHashValue(2, this->callsign, "dest", flightPlan.dest, expt);
-    Global::get().redis->setHashValue(2, this->callsign, "enrouteHour", QString::number(flightPlan.enrouteHour), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "enrouteMin", QString::number(flightPlan.enrouteMin), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "fobHour", QString::number(flightPlan.fobHour), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "fobMin", QString::number(flightPlan.fobMin), expt);
-    Global::get().redis->setHashValue(2, this->callsign, "alterDest", flightPlan.alterDest, expt);
-    Global::get().redis->setHashValue(2, this->callsign, "remark", flightPlan.remark, expt);
-    Global::get().redis->setHashValue(2, this->callsign, "route", flightPlan.route, expt);
 }

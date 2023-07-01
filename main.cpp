@@ -3,7 +3,6 @@
 #include "Global.h"
 #include "Server.h"
 #include "Mysql.h"
-#include "Redis.h"
 
 void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -59,9 +58,6 @@ int main(int argc, char *argv[]) {
     //连接Mysql服务器
     qInfo()<<"Connecting to Mysql Server";
     Global::get().mysql = new Mysql();
-    //连接Redis
-    qInfo()<<"Connecting to Redis Server";
-    Global::get().redis = new Redis();
     //创建服务器
     qInfo()<<"Initializing Server.";
     Global::get().server = new Server();
