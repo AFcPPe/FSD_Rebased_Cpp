@@ -6,8 +6,8 @@
 #define FSD_REBASED_REDIS_H
 
 #include <QObject>
-#include "hiredis.h"
-
+#include "sw/redis++/redis++.h"
+//using namespace sw::redis;
 class Redis: public QObject{
     Q_OBJECT
 public:
@@ -15,7 +15,7 @@ public:
     bool setHashValue(int db,QString key,QString field, QString value,int expire);
     QString getHashValue(int db,QString key,QString field);
 private:
-    redisContext* c;
+    sw::redis::ConnectionOptions option;
 private slots:
 
 };

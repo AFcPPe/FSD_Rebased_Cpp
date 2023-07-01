@@ -9,8 +9,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_PREFIX_PATH "D:/Qt/6.5.1/mingw_64/lib/cmake")
 #add_subdirectory(Hiredis)
 
-link_directories(${PROJECT_SOURCE_DIR}/Hiredis)
-include_directories(${PROJECT_SOURCE_DIR}/Hiredis)
+link_directories(${PROJECT_SOURCE_DIR}/redis++/lib)
+include_directories(${PROJECT_SOURCE_DIR}/redis++/include)
 find_package(Qt6 COMPONENTS
         Core
         Network
@@ -82,6 +82,7 @@ target_link_libraries(FSD_Rebased
         Qt::Network
         Qt::Sql
         Qt::Concurrent
+        libredis++.dll.a
         libhiredis.dll.a
         )
 

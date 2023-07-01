@@ -18,6 +18,7 @@ void Settings::load() {
     QJsonDocument jsonDocu = QJsonDocument::fromJson(jsonData);
     if(jsonDocu.isObject()){
         QJsonObject obj_root = jsonDocu.object();
+
         //读取motd
         auto motdArray =  obj_root.value("motd").toArray();
         for(auto motd : motdArray){
@@ -41,6 +42,7 @@ void Settings::load() {
         this->redisSettings.port = obj_redis.value("port").toInt();
         this->redisSettings.password = obj_redis.value("password").toString();
         this->redisSettings.posExpire = obj_redis.value("PosExpireTime").toInt();
+        this->redisSettings.flightPlanExpireTime = obj_redis.value("FlightPlanExpireTime").toInt();
     }
 
 }

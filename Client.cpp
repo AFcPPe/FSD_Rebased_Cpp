@@ -202,6 +202,7 @@ void Client::onAddPilotReceived(PDUAddPilot pdu) {
     emit RaiseMotdToRead();
     QtConcurrent::run(&Client::updatePilotData,this);
     processData("\r\n");
+    //TODO: 飞行计划的下载
 }
 
 void Client::onPilotPositionReceived(PDUPilotPosition pdu){
@@ -299,6 +300,7 @@ void Client::onFlightPlanReceived(PDUFlightPlan pdu) {
     flightPlan.route = pdu.Route;
     pdu.To = "*A";
     emit RaiseForwardInfo(this,"*A", Serialize(pdu));
+    //TODO：飞机计划的上传
 }
 
 void Client::onClientQueryReceived(PDUClientQuery pdu) {
@@ -307,4 +309,23 @@ void Client::onClientQueryReceived(PDUClientQuery pdu) {
         return;
     }
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+}
+
+void Client::uploadFlightPlan() {
+    int expt = Global::get().s.redisSettings.flightPlanExpireTime;
+    Global::get().redis->setHashValue(2, this->callsign, "flightRule", toQString(flightPlan.flightRule), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "type", flightPlan.type, expt);
+    Global::get().redis->setHashValue(2, this->callsign, "tas", QString::number(flightPlan.tas), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "dep", flightPlan.dep, expt);
+    Global::get().redis->setHashValue(2, this->callsign, "depTime", QString::number(flightPlan.depTime), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "actualDepTime", QString::number(flightPlan.actualDepTime), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "cruiseAlt", flightPlan.cruiseAlt, expt);
+    Global::get().redis->setHashValue(2, this->callsign, "dest", flightPlan.dest, expt);
+    Global::get().redis->setHashValue(2, this->callsign, "enrouteHour", QString::number(flightPlan.enrouteHour), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "enrouteMin", QString::number(flightPlan.enrouteMin), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "fobHour", QString::number(flightPlan.fobHour), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "fobMin", QString::number(flightPlan.fobMin), expt);
+    Global::get().redis->setHashValue(2, this->callsign, "alterDest", flightPlan.alterDest, expt);
+    Global::get().redis->setHashValue(2, this->callsign, "remark", flightPlan.remark, expt);
+    Global::get().redis->setHashValue(2, this->callsign, "route", flightPlan.route, expt);
 }

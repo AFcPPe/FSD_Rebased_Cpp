@@ -153,6 +153,8 @@ private:
     void onATCPositionReceived(PDUATCPosition pdu);
     void onFlightPlanReceived(PDUFlightPlan pdu);
     void onClientQueryReceived(PDUClientQuery pdu);
+
+    void uploadFlightPlan();
 private slots:
     void onIncomingData();
     void showError(PDUProtocolError pdu);

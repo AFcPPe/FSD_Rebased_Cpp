@@ -25,6 +25,7 @@ struct RedisSettings{
     int port;
     QString password;
     int posExpire;
+    int flightPlanExpireTime;
 };
 
 class Settings {

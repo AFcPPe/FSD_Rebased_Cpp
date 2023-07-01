@@ -4,10 +4,6 @@
 #include "Server.h"
 #include "Mysql.h"
 #include "Redis.h"
-#define MY_THROW(...) \
-    assert();\
-    someloglib::log("fuck:",__FILE__,__LINE__);\
-    throw __VA_ARGS__
 
 void log(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
