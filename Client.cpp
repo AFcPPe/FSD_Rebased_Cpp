@@ -90,9 +90,11 @@ void Client::processData(QString data) {
             } else if (pduTypeId == "#SB") {
                 if (fields.length() >= 3) {
                     if (fields[2] == "PIR") {
+                        QtConcurrent::run(&Client::onPlaneInfoRequestReceived,this,PDUPlaneInfoRequest::fromTokens(fields));
                         emit RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest::fromTokens(fields));
                     } else if (fields[2] == "PI" && fields.length() >= 4) {
                         if (fields[3] == "GEN") {
+                            QtConcurrent::run(&Client::onPlaneInfoResponseReceived,this,PDUPlaneInfoResponse::fromTokens(fields));
                             emit RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse::fromTokens(fields));
                         }
                     }
@@ -235,4 +237,12 @@ void Client::onClientQueryResponseReceived(PDUClientQueryResponse pdu) {
 void Client::onMetarRequestReceived(PDUMetarRequest pdu) {
     QString metar = Global::get().weather->getMetar(pdu.Station);
     socket->write(Serialize(PDUMetarResponse(this->callsign,metar)).toLocal8Bit());
+}
+
+void Client::onPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu) {
+    emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+}
+
+void Client::onPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu) {
+    emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
 }

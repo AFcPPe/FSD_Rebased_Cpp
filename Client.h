@@ -146,7 +146,8 @@ private:
     void onFlightPlanReceived(PDUFlightPlan pdu);
     void onClientQueryReceived(PDUClientQuery pdu);
     void onClientQueryResponseReceived(PDUClientQueryResponse pdu);
-
+    void onPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
+    void onPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
 
 private slots:
     void onIncomingData();

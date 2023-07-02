@@ -259,6 +259,8 @@ QString toQString(const ClientQueryType &value) {
             return "SCOMM";
         case ClientQueryType::SD:
             return "SD";
+        case ClientQueryType::SIMDATA:
+            return "SIMDATA";
         default:
             return "";
     }
@@ -334,7 +336,9 @@ ClientQueryType fromQString(const QString &str) {
         return ClientQueryType::SCOMM;
     } else if (str == "SD") {
         return ClientQueryType::SD;
-    } else {
+    }else if (str == "SIMDATA") {
+        return ClientQueryType::SIMDATA;
+    }else {
         return ClientQueryType::Unknown;
     }
 }
