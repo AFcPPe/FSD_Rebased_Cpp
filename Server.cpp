@@ -149,6 +149,10 @@ void Server::onQueryToReqsonse(Client *from, PDUClientQuery pdu) {
     if(pdu.QueryType == ClientQueryType::FlightPlan){
         for(auto client: qlClientPool){
             if(client->callsign == pdu.Payload[0]){
+                if(client->flightPlan.dest==""){
+                    emit from->RaiseErrorToSend(PDUProtocolError("SERVER",from->callsign,NetworkError::NoFlightPlan,"","No flightplan",false));
+                    return;
+                }
 //                qDebug()<<Serialize(PDUFlightPlan(client->callsign, from->callsign, client->flightPlan.flightRule, client->flightPlan.type, client->flightPlan.tas, client->flightPlan.dep,
 //                                                  client->flightPlan.depTime, client->flightPlan.actualDepTime, client->flightPlan.cruiseAlt, client->flightPlan.dest, client->flightPlan.enrouteHour,
 //                                                  client->flightPlan.enrouteMin, client->flightPlan.fobHour,client->flightPlan.fobMin,client->flightPlan.alterDest,client->flightPlan.remark, client->flightPlan.route));
