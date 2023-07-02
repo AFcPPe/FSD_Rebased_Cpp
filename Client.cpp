@@ -135,6 +135,14 @@ void Client::processData(QString data) {
 }
 
 void Client::onAddATCReceived(PDUAddATC pdu) {
+    if(this->clientStatus!=Connected){
+        emit RaiseErrorToSend(PDUProtocolError("SERVER","unknown",NetworkError::UnauthorizedSoftware,"","Fuck off", true));
+        return;
+    }
+    if(pdu.From.length()>12||pdu.From.length()<3){
+        emit RaiseErrorToSend(PDUProtocolError("SERVER","unknown",NetworkError::CallsignInvalid,"","Invalid Callsign", true));
+        return;
+    }
     emit RaiseUserAuthRequest(pdu.CID,pdu.Password,pdu.Rating, this);
     this->clientType = ATC;
     this->callsign = pdu.From;
@@ -165,6 +173,14 @@ void Client::readMotd() {
 }
 
 void Client::onAddPilotReceived(PDUAddPilot pdu) {
+    if(this->clientStatus != Connected){
+        emit RaiseErrorToSend(PDUProtocolError("SERVER","unknown",NetworkError::UnauthorizedSoftware,"","Fuck off", true));
+        return;
+    }
+    if(pdu.From.length()>12||pdu.From.length()<3){
+        emit RaiseErrorToSend(PDUProtocolError("SERVER","unknown",NetworkError::CallsignInvalid,"","Invalid Callsign", true));
+        return;
+    }
     emit RaiseUserAuthRequest(pdu.CID,pdu.Password,pdu.Rating,this);
     this->clientType = Pilot;
     this->callsign = pdu.From;
