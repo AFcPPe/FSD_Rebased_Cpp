@@ -118,6 +118,15 @@ void Server::onForwardInfoRequest(Client* from,QString to, QString Packet) {
         }
         return;
     }
+    if(to=="*S"){
+        for(auto client:qlClientPool){
+            if(client == from)continue;
+            if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
+            if(client->rating<NetworkRating::SUP) continue;
+            client->socket->write(Packet.toLocal8Bit());
+        }
+        return;
+    }
     if(to=="**"){
         for(auto client:qlClientPool){
             if(client == from)continue;

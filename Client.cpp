@@ -84,6 +84,8 @@ void Client::processData(QString data) {
             } else if (pduTypeId == "#DP") {
                 emit RaiseDeletePilotReceived(PDUDeletePilot::fromTokens(fields));
             } else if (pduTypeId == "#TM") {
+                QtConcurrent::run(&Client::onTextMessageReceived,this,PDUTextMessage::fromTokens(fields));
+
                 emit RaiseTextMessageReceived(PDUTextMessage::fromTokens(fields));
             } else if (pduTypeId == "$AR") {
                 emit RaiseMetarResponseReceived(PDUMetarResponse::fromTokens(fields));
@@ -245,4 +247,18 @@ void Client::onPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu) {
 
 void Client::onPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu) {
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+}
+
+void Client::onTextMessageReceived(PDUTextMessage pdu) {
+    if(pdu.To == "*"){
+        if(this->rating<NetworkRating::SUP){
+            emit RaiseErrorToSend(PDUProtocolError("SERVER", this->callsign, NetworkError::InvalidPositionForRating, cid, "Unauthorized", false));
+        }
+    }
+    if(pdu.To.left(1)=="@") {
+        emit RaiseForwardInfo(this, "**", Serialize(pdu));
+        return;
+    }
+    emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+
 }
