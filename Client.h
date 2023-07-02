@@ -145,6 +145,7 @@ private:
     void onATCPositionReceived(PDUATCPosition pdu);
     void onFlightPlanReceived(PDUFlightPlan pdu);
     void onClientQueryReceived(PDUClientQuery pdu);
+    void onClientQueryResponseReceived(PDUClientQueryResponse pdu);
 
 
 private slots:

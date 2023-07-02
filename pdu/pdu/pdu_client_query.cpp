@@ -23,11 +23,14 @@ QStringList PDUClientQuery::toTokens() const
 
 PDUClientQuery PDUClientQuery::fromTokens(const QStringList &tokens)
 {
+
     if(tokens.length() < 3) {
         throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     QStringList payload;
     if (tokens.size() > 3) { payload = tokens.mid(3); }
+    if(toQString(fromQString<ClientQueryType>(tokens[2]))!=tokens[2])
+    qDebug()<<"No Match Type "<<tokens[2];
     return PDUClientQuery(tokens[0], tokens[1], fromQString<ClientQueryType>(tokens[2]), payload);
 }

@@ -78,7 +78,8 @@ enum class ClientQueryType
     NewInfo,
     NewATIS,
     Estimate,
-    SetGlobalData
+    SetGlobalData,
+    SimTime, SDILS, SimTag, SCOMM, SD
 };
 
 enum class FlightRules

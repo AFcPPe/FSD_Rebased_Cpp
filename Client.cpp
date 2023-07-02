@@ -111,6 +111,7 @@ void Client::processData(QString data) {
                 QtConcurrent::run(&Client::onClientQueryReceived,this,PDUClientQuery::fromTokens(fields));
                 emit RaiseClientQueryReceived(PDUClientQuery::fromTokens(fields));
             } else if (pduTypeId == "$CR") {
+                QtConcurrent::run(&Client::onClientQueryResponseReceived,this,PDUClientQueryResponse::fromTokens(fields));
                 emit RaiseClientQueryResponseReceived(PDUClientQueryResponse::fromTokens(fields));
             } else if (pduTypeId == "$!!") {
                 emit RaiseKillRequestReceived(PDUKillRequest::fromTokens(fields));
@@ -131,30 +132,11 @@ void Client::processData(QString data) {
 
 void Client::onAddATCReceived(PDUAddATC pdu) {
     emit RaiseUserAuthRequest(pdu.CID,pdu.Password,pdu.Rating, this);
-//    UserInfo info = Global::get().mysql->getUserInfo(pdu.CID);
-//    if(info.cid!=pdu.CID){
-//        qInfo()<<qPrintable(QString("User login failed. User %1 not in database. IP: %2").arg(pdu.CID,this->socket->peerAddress().toString()));
-//        emit RaiseErrorToSend(PDUProtocolError("server", pdu.From, NetworkError::CallsignInvalid, pdu.CID, "Invalid CID/password", true));
-//        return;
-//    }
-//    if(info.encryptedPassword != pdu.Password){
-//        qInfo()<<qPrintable(QString("User login failed. Password mismatch. IP: %1").arg(this->socket->peerAddress().toString()));
-//        emit RaiseErrorToSend(PDUProtocolError("server", pdu.From, NetworkError::CallsignInvalid, pdu.CID, "Invalid CID/password", true));
-//        return;
-//    }
-//    if(info.rating < pdu.Rating){
-//        qInfo()<<qPrintable(QString("User login failed. Requested level to high. IP: %1").arg(this->socket->peerAddress().toString()));
-//        emit RaiseErrorToSend(PDUProtocolError("server", pdu.From, NetworkError::InvalidPositionForRating, pdu.CID, "Requested level to high.", true));
-//        return;
-//    }
     this->clientType = ATC;
     this->callsign = pdu.From;
     this->realName = pdu.RealName;
     this->cid = pdu.CID;
     this->rating = pdu.Rating;
-//    qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
-//    emit RaiseMotdToRead();
-//    processData("\r\n");
 }
 
 void Client::showError(PDUProtocolError pdu) {
@@ -180,30 +162,11 @@ void Client::readMotd() {
 
 void Client::onAddPilotReceived(PDUAddPilot pdu) {
     emit RaiseUserAuthRequest(pdu.CID,pdu.Password,pdu.Rating,this);
-//    UserInfo info = Global::get().mysql->getUserInfo(pdu.CID);
-//    if(info.cid!=pdu.CID){
-//        qInfo()<<qPrintable(QString("User login failed. User %1 not in database. IP: %2").arg(pdu.CID,this->socket->peerAddress().toString()));
-//        emit RaiseErrorToSend(PDUProtocolError("server", pdu.From, NetworkError::CallsignInvalid, pdu.CID, "Invalid CID/password", true));
-//        return;
-//    }
-//    if(info.encryptedPassword != pdu.Password){
-//        qInfo()<<qPrintable(QString("User login failed. Password mismatch. IP: %1").arg(this->socket->peerAddress().toString()));
-//        emit RaiseErrorToSend(PDUProtocolError("server", pdu.From, NetworkError::CallsignInvalid, pdu.CID, "Invalid CID/password", true));
-//        return;
-//    }
-//    if(info.rating < pdu.Rating){
-//        qInfo()<<qPrintable(QString("User login failed. Requested level to high. IP: %1").arg(this->socket->peerAddress().toString()));
-//        emit RaiseErrorToSend(PDUProtocolError("server", pdu.From, NetworkError::InvalidPositionForRating, pdu.CID, "Requested level to high.", true));
-//        return;
-//    }
     this->clientType = Pilot;
     this->callsign = pdu.From;
     this->realName = pdu.RealName;
     this->cid = pdu.CID;
     this->rating = pdu.Rating;
-//    qInfo()<<qPrintable(QString("User %1 logon as %2").arg(this->cid,this->callsign));
-//    emit RaiseMotdToRead();
-//    processData("\r\n");
     //TODO: 飞行计划的下载
 }
 
@@ -257,6 +220,15 @@ void Client::onClientQueryReceived(PDUClientQuery pdu) {
         emit RaiseQueryToResponse(this,pdu);
         return;
     }
+    if(pdu.To.left(1)=="@"){
+        emit RaiseForwardInfo(this,"**", Serialize(pdu));
+    }else{
+        emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+    }
+
+}
+
+void Client::onClientQueryResponseReceived(PDUClientQueryResponse pdu) {
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
 }
 
