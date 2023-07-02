@@ -21,7 +21,7 @@ Mysql::Mysql() {
 }
 
 QSqlQuery Mysql::queryUser(QString sql) {
-    db_user.open();
+    if(!db_user.open()) return QSqlQuery();
     QSqlQuery query(db_user);
     query.exec(sql);
     db_user.close();

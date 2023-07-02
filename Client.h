@@ -135,6 +135,7 @@ signals:
     void RaiseMotdToRead();
     void RaiseForwardInfo(Client* from,QString to,QString Packet);
     void RaiseQueryToResponse(Client* client, PDUClientQuery);
+    void RaiseUserAuthRequest(QString,QString,NetworkRating,Client*);
 private:
     void processData(QString data);
 

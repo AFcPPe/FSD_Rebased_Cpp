@@ -29,6 +29,7 @@ private slots:
     void onCheckStatus();
     void onForwardInfoRequest(Client* from,QString to,QString Packet);
     void onQueryToReqsonse(Client* from,PDUClientQuery pdu);
+    void onUserLoginRequest(QString cid, QString password, NetworkRating requestedRating,Client* client);
 };
 
 

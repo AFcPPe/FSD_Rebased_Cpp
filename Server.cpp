@@ -33,6 +33,8 @@ void Server::onNewConnection() {
         connect(newClient,&Client::RaiseClientPendingKick,this,&Server::onUserPendingKick);
         connect(newClient,&Client::RaiseForwardInfo,this,&Server::onForwardInfoRequest);
         connect(newClient,&Client::RaiseQueryToResponse,this,&Server::onQueryToReqsonse);
+        connect(newClient,&Client::RaiseUserAuthRequest,this,&Server::onUserLoginRequest);
+
         qInfo()<<qPrintable(QString("New connection from %1 established").arg(socket->peerAddress().toString()));
     }
 }
@@ -94,7 +96,6 @@ void Server::onForwardInfoRequest(Client* from,QString to, QString Packet) {
         for(auto client:qlClientPool){
             if(client == from)continue;
             if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
-
             client->socket->write(Packet.toLocal8Bit());
         }
         return;
@@ -123,9 +124,9 @@ void Server::onQueryToReqsonse(Client *from, PDUClientQuery pdu) {
     if(pdu.QueryType == ClientQueryType::FlightPlan){
         for(auto client: qlClientPool){
             if(client->callsign == pdu.Payload[0]){
-                qDebug()<<Serialize(PDUFlightPlan(client->callsign, from->callsign, client->flightPlan.flightRule, client->flightPlan.type, client->flightPlan.tas, client->flightPlan.dep,
-                                                  client->flightPlan.depTime, client->flightPlan.actualDepTime, client->flightPlan.cruiseAlt, client->flightPlan.dest, client->flightPlan.enrouteHour,
-                                                  client->flightPlan.enrouteMin, client->flightPlan.fobHour,client->flightPlan.fobMin,client->flightPlan.alterDest,client->flightPlan.remark, client->flightPlan.route));
+//                qDebug()<<Serialize(PDUFlightPlan(client->callsign, from->callsign, client->flightPlan.flightRule, client->flightPlan.type, client->flightPlan.tas, client->flightPlan.dep,
+//                                                  client->flightPlan.depTime, client->flightPlan.actualDepTime, client->flightPlan.cruiseAlt, client->flightPlan.dest, client->flightPlan.enrouteHour,
+//                                                  client->flightPlan.enrouteMin, client->flightPlan.fobHour,client->flightPlan.fobMin,client->flightPlan.alterDest,client->flightPlan.remark, client->flightPlan.route));
                 from->socket->write(Serialize(PDUFlightPlan(client->callsign, from->callsign, client->flightPlan.flightRule, client->flightPlan.type, client->flightPlan.tas, client->flightPlan.dep,
                                                             client->flightPlan.depTime, client->flightPlan.actualDepTime, client->flightPlan.cruiseAlt, client->flightPlan.dest, client->flightPlan.enrouteHour,
                                                             client->flightPlan.enrouteMin, client->flightPlan.fobHour,client->flightPlan.fobMin,client->flightPlan.alterDest,client->flightPlan.remark, client->flightPlan.route)).toLocal8Bit());
@@ -133,4 +134,26 @@ void Server::onQueryToReqsonse(Client *from, PDUClientQuery pdu) {
             }
         }
     }
+}
+
+void Server::onUserLoginRequest(QString cid, QString password, NetworkRating requestedRating,Client* client) {
+    UserInfo info = Global::get().mysql->getUserInfo(cid);
+    if(info.cid!=cid){
+        qInfo()<<qPrintable(QString("User login failed. User %1 not in database. IP: %2").arg(cid,client->socket->peerAddress().toString()));
+        emit client->RaiseErrorToSend(PDUProtocolError("server", client->callsign, NetworkError::InvalidLogon, cid, "Invalid CID/password", true));
+        return;
+    }
+    if(info.encryptedPassword != password){
+        qInfo()<<qPrintable(QString("User login failed. Password mismatch. IP: %1").arg(client->socket->peerAddress().toString()));
+        emit client->RaiseErrorToSend(PDUProtocolError("server", client->callsign, NetworkError::InvalidLogon, cid, "Invalid CID/password", true));
+        return;
+    }
+    if(info.rating < requestedRating){
+        qInfo()<<qPrintable(QString("User login failed. Requested level to high. IP: %1").arg(client->socket->peerAddress().toString()));
+        emit client->RaiseErrorToSend(PDUProtocolError("server", client->callsign, NetworkError::InvalidPositionForRating, cid, "Requested level to high.", true));
+        return;
+    }
+    qInfo()<<qPrintable(QString("User %1 logon as %2").arg(client->cid,client->callsign));
+    emit client->RaiseMotdToRead();
+    client->clientStatus = Logon;
 }
