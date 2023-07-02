@@ -53,7 +53,7 @@ void Server::onUserPendingKick(Client* client) {
                 onForwardInfoRequest(client,"@", Serialize(PDUDeleteATC(client->callsign,client->cid)));
             }
         }
-        delete client;
+        client->deleteLater();
     }
 }
 
