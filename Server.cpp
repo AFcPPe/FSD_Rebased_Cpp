@@ -84,14 +84,6 @@ double Server::calculateDistanceBetweenClients(Client * A, Client * B) {
 }
 
 void Server::onForwardInfoRequest(Client* from,QString to, QString Packet) {
-    if(to=="*"){
-        for(auto client:qlClientPool){
-            if(client == from)continue;
-            if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;
-            client->socket->write(Packet.arg(client->callsign).toLocal8Bit());
-        }
-        return;
-    }
     if(to=="@"){
         for(auto client:qlClientPool){
             if(client == from)continue;
@@ -127,7 +119,7 @@ void Server::onForwardInfoRequest(Client* from,QString to, QString Packet) {
         }
         return;
     }
-    if(to=="**"){
+    if(to=="*"){
         for(auto client:qlClientPool){
             if(client == from)continue;
             if(client->clientStatus== Connected||client->clientStatus== PendingKick)continue;

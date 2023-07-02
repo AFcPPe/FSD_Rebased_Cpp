@@ -256,7 +256,7 @@ void Client::onTextMessageReceived(PDUTextMessage pdu) {
         }
     }
     if(pdu.To.left(1)=="@") {
-        emit RaiseForwardInfo(this, "**", Serialize(pdu));
+        emit RaiseForwardInfo(this, "*", Serialize(pdu));
         return;
     }
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
