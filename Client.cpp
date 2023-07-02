@@ -219,7 +219,6 @@ void Client::onPilotPositionReceived(PDUPilotPosition pdu){
     this->pitch = pdu.Pitch;
     this->heading = pdu.Heading;
     this->bank = pdu.Bank;
-    pdu.To = "%1";
     emit RaiseForwardInfo(this,"@", Serialize(pdu));
 }
 
@@ -230,7 +229,6 @@ void Client::onATCPositionReceived(PDUATCPosition pdu) {
     this->facility = pdu.Facility;
     this->frequencies = pdu.Frequencies;
     this->visualRange = pdu.VisibilityRange;
-    pdu.To = "%1";
     emit RaiseForwardInfo(this,"@", Serialize(pdu));
 }
 
