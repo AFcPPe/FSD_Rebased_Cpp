@@ -39,6 +39,7 @@ void Settings::load() {
         //读取Metar设置
         this->MetarRefreshTime = obj_root.value("MetarRefreshTime").toInt();
         this->MetarRefreshUrl = obj_root.value("MetarRefreshUrl").toString();
+        this->MaxUser = obj_root.value("MaxUser").toInt();
     }
 
 }

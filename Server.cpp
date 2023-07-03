@@ -28,6 +28,12 @@ Server::Server() {
 void Server::onNewConnection() {
     if(m_server->hasPendingConnections()){
         QTcpSocket* socket =  m_server->nextPendingConnection();
+        if(qlClientPool.length()>Global::get().s.MaxUser){
+            qInfo()<<"Max user exceeded when a user is trying to connect. IP: "<< socket->peerAddress().toString();
+            socket->close();
+            socket->deleteLater();
+            return;
+        }
         Client *newClient = new Client(socket);
         qlClientPool.append(newClient);
         connect(newClient,&Client::RaiseClientPendingKick,this,&Server::onUserPendingKick);

@@ -28,6 +28,7 @@ public:
     MysqlSettings mysqlSettings;
     int MetarRefreshTime;
     QString MetarRefreshUrl;
+    int MaxUser;
     void load();
     Settings();
 };
