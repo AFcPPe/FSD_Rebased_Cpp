@@ -78,7 +78,7 @@ add_executable(FSD_Rebased
         Weather.cpp
         Weather.h
         pdu/pdu/pdu_hand_off.h
-        pdu/pdu/pdu_hand_off.cpp)
+        pdu/pdu/pdu_hand_off.cpp pdu/pdu/pdu_hand_off_acknowledge.cpp)
 target_link_libraries(FSD_Rebased
         Qt::Core
         Qt::Network
