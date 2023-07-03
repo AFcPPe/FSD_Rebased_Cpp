@@ -85,7 +85,6 @@ void Client::processData(QString data) {
                 emit RaiseDeletePilotReceived(PDUDeletePilot::fromTokens(fields));
             } else if (pduTypeId == "#TM") {
                 QtConcurrent::run(&Client::onTextMessageReceived,this,PDUTextMessage::fromTokens(fields));
-
                 emit RaiseTextMessageReceived(PDUTextMessage::fromTokens(fields));
             } else if (pduTypeId == "$AR") {
                 emit RaiseMetarResponseReceived(PDUMetarResponse::fromTokens(fields));
@@ -106,8 +105,10 @@ void Client::processData(QString data) {
                 QtConcurrent::run(&Client::onFlightPlanReceived,this,PDUFlightPlan::fromTokens(fields));
             } else if (pduTypeId == "$PI") {
                 emit RaisePingReceived(PDUPing::fromTokens(fields));
+            }else if (pduTypeId == "$HO") {
+                QtConcurrent::run(&Client::onHandOffReceived,this,PDUHandOff::fromTokens(fields));
+                emit RaiseHandOffReceived(PDUHandOff::fromTokens(fields));
             } else if (pduTypeId == "$AX") {
-
                 emit RaiseMetarRequestReceived(PDUMetarRequest::fromTokens(fields));
             } else if (pduTypeId == "$PO") {
                 emit RaisePongReceived(PDUPong::fromTokens(fields));
@@ -277,4 +278,9 @@ void Client::onTextMessageReceived(PDUTextMessage pdu) {
     }
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
 
+}
+
+void Client::onHandOffReceived(PDUHandOff pdu) {
+    qDebug()<<pdu.toTokens();
+    emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
 }
