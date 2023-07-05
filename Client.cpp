@@ -88,6 +88,9 @@ void Client::processData(QString data) {
                 emit RaiseTextMessageReceived(PDUTextMessage::fromTokens(fields));
             } else if (pduTypeId == "$AR") {
                 emit RaiseMetarResponseReceived(PDUMetarResponse::fromTokens(fields));
+            }else if (pduTypeId == "#PC") {
+                QtConcurrent::run(&Client::onPCReceived,this,PDUPC::fromTokens(fields));
+                emit RaisePCReceived(PDUPC::fromTokens(fields));
             } else if (pduTypeId == "#SB") {
                 if (fields.length() >= 3) {
                     if (fields[2] == "PIR") {
@@ -108,6 +111,9 @@ void Client::processData(QString data) {
             }else if (pduTypeId == "$HO") {
                 QtConcurrent::run(&Client::onHandOffReceived,this,PDUHandOff::fromTokens(fields));
                 emit RaiseHandOffReceived(PDUHandOff::fromTokens(fields));
+            }else if (pduTypeId == "$HA") {
+                QtConcurrent::run(&Client::onHandOffAcknowledgeReceived,this,PDUHandOffAcknowledge::fromTokens(fields));
+                emit RaiseHandOffAcknowledgeReceived(PDUHandOffAcknowledge::fromTokens(fields));
             } else if (pduTypeId == "$AX") {
                 emit RaiseMetarRequestReceived(PDUMetarRequest::fromTokens(fields));
             } else if (pduTypeId == "$PO") {
@@ -242,7 +248,7 @@ void Client::onClientQueryReceived(PDUClientQuery pdu) {
         return;
     }
     if(pdu.To.left(1)=="@"){
-        emit RaiseForwardInfo(this,"**", Serialize(pdu));
+        emit RaiseForwardInfo(this,"*", Serialize(pdu));
     }else{
         emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
     }
@@ -281,6 +287,13 @@ void Client::onTextMessageReceived(PDUTextMessage pdu) {
 }
 
 void Client::onHandOffReceived(PDUHandOff pdu) {
-    qDebug()<<pdu.toTokens();
+    emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+}
+
+void Client::onHandOffAcknowledgeReceived(PDUHandOffAcknowledge pdu) {
+    emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
+}
+
+void Client::onPCReceived(PDUPC pdu){
     emit RaiseForwardInfo(this,pdu.To, Serialize(pdu));
 }

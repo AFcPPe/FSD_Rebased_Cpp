@@ -33,6 +33,8 @@
 #include "pdu/pdu/pdu_send_fast.h"
 #include "pdu/pdu/pdu_flight_plan.h"
 #include "pdu/pdu/pdu_hand_off.h"
+#include "pdu/pdu/pdu_hand_off_acknowledge.h"
+#include "pdu/pdu/pdu_pc.h"
 #include "Global.h"
 #include "Mysql.h"
 #include <QtConcurrent/QtConcurrent>
@@ -131,6 +133,8 @@ signals:
     void RaiseSendFastReceived(PDUSendFast pdu);
     void RaiseMetarRequestReceived(PDUMetarRequest pdu);
     void RaiseHandOffReceived(PDUHandOff pdu);
+    void RaiseHandOffAcknowledgeReceived(PDUHandOffAcknowledge pdu);
+    void RaisePCReceived(PDUPC pdu);
     //OuterEvent
     void RaiseClientPendingKick(Client* client);
     void RaiseErrorToSend(PDUProtocolError pdu);
@@ -151,6 +155,8 @@ private:
     void onPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
     void onTextMessageReceived(PDUTextMessage pdu);
     void onHandOffReceived(PDUHandOff pdu);
+    void onHandOffAcknowledgeReceived(PDUHandOffAcknowledge pdu);
+    void onPCReceived(PDUPC pdu);
 
 private slots:
     void onIncomingData();
