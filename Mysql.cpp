@@ -5,6 +5,7 @@
 
 #include "Mysql.h"
 
+
 Mysql::Mysql() {
     db_user = QSqlDatabase::addDatabase("QMYSQL");
     db_user.setHostName(Global::get().s.mysqlSettings.address);
@@ -32,8 +33,11 @@ UserInfo Mysql::getUserInfo(QString cid) {
     QSqlQuery result = queryUser(QString("SELECT username,password,level from newuser where username=%1 limit 1").arg(cid));
     result.next();
     if(result.isValid()){
-        return UserInfo(result.value(0).toString(), result.value(1).toString(),
-                        static_cast<NetworkRating>(result.value(2).toInt()));
+        UserInfo ret;
+        ret.cid = result.value(0).toString();
+        ret.encryptedPassword = result.value(1).toString();
+        ret.rating = static_cast<NetworkRating>(result.value(2).toInt());
+        return ret;
     }
     return {};
 }
